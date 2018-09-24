@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/tomquirk/mess.git"
   },
-  "author": "",
+  "author": "Tom Quirk <tomquirkacc@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/tomquirk/mess/issues"
@@ -22,7 +22,9 @@
   "homepage": "https://github.com/tomquirk/mess#readme",
   "dependencies": {
     "facebook-chat-api": "github:Schmavery/facebook-chat-api",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "prompt": "^1.0.0",
+    "readline": "^1.3.0"
   },
   "devDependencies": {
     "mocha": "^5.2.0",
