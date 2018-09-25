@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tomquirk/mess.git"
+    "url": "git+https://github.com/tomquirk/messy.git"
   },
   "author": "Tom Quirk <tomquirkacc@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tomquirk/mess/issues"
+    "url": "https://github.com/tomquirk/messy/issues"
   },
-  "homepage": "https://github.com/tomquirk/mess#readme",
+  "homepage": "https://github.com/tomquirk/messy#readme",
   "dependencies": {
     "facebook-chat-api": "github:Schmavery/facebook-chat-api",
     "mkdirp": "^0.5.1",
