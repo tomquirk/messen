@@ -1,8 +1,9 @@
-const facebook = require("facebook-chat-api");
-const fs = require("fs");
+import facebook from 'facebook-chat-api';
+import fs from 'fs';
 
-const settings = require("./settings");
-const helpers = require("./util/helpers");
+import * as settings from './settings';
+
+import * as helpers from './util/helpers';
 
 /**
  * Creates a singleton that represents a Messy session.
@@ -16,36 +17,36 @@ function Messy(options = {}) {
 }
 
 Messy.prototype.getMfaCode = function getMfaCode() {
-  return Promise.reject("getMfaCode not implemented");
+  return Promise.reject('getMfaCode not implemented');
 };
 
-Messy.prototype.login = function login(credentials) {
+Messy.prototype.login = function login(credentials: facebook.Credentials) {
   const config = {
     forceLogin: true,
-    logLevel: this.options.debug ? "info" : "silent",
+    logLevel: this.options.debug ? 'info' : 'silent',
     selfListen: true,
-    listenEvents: true
+    listenEvents: true,
   };
 
   return new Promise((resolve, reject) => {
     facebook(credentials, config, (err, api) => {
       if (err) {
         switch (err.error) {
-          case "login-approval":
+          case 'login-approval':
             return this.getMfaCode()
-              .then(code => {
+              .then((code: string) => {
                 return err.continue(code);
               })
-              .catch(mfaErr => reject(mfaErr));
+              .catch((mfaErr: string) => reject(mfaErr));
           default:
             return reject(
-              Error(`Failed to login as [${credentials.email}]:`, err)
+              Error(`Failed to login as [${credentials.email}]: ${err}`),
             );
         }
       }
 
       if (!api) {
-        return reject("api failed to load");
+        return reject('api failed to load');
       }
 
       return helpers

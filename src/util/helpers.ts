@@ -1,6 +1,7 @@
-const fs = require("fs");
-const path = require("path");
-const mkdirp = require("mkdirp");
+import fs from 'fs';
+import path from 'path';
+import mkdirp from 'mkdirp';
+import facebook from 'facebook-chat-api';
 
 /**
  * Dumps the state of the Facebook API to a file
@@ -8,7 +9,7 @@ const mkdirp = require("mkdirp");
  * @param {string} filepath file to save appstate to
  * @return {Promise}
  */
-function saveAppState(appstate, filepath) {
+export function saveAppState(appstate: facebook.AppState, filepath: string) {
   return new Promise((resolve, reject) =>
     mkdirp(path.dirname(filepath), mkdirpErr => {
       if (mkdirpErr) return reject(mkdirpErr);
@@ -19,10 +20,10 @@ function saveAppState(appstate, filepath) {
 
         return resolve(appstate);
       });
-    })
+    }),
   );
 }
 
 module.exports = {
-  saveAppState
+  saveAppState,
 };
