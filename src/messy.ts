@@ -20,7 +20,9 @@ Messy.prototype.getMfaCode = function getMfaCode() {
   return Promise.reject('getMfaCode not implemented');
 };
 
-Messy.prototype.login = function login(credentials: facebook.Credentials) {
+Messy.prototype.login = function login(
+  credentials: facebook.Credentials,
+): Promise<any> {
   const config = {
     forceLogin: true,
     logLevel: this.options.debug ? 'info' : 'silent',

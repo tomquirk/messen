@@ -1,7 +1,8 @@
 dist/
+debug.log
 
 playground.js
-.credentials.json
+.env
 
 # misc
 node_modules
