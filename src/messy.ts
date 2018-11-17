@@ -28,12 +28,12 @@ function fetchUserInfo(
 }
 
 function getApi(
-  credentials: facebook.Credentials,
+  payload: facebook.Credentials | { appState: facebook.AppState },
   config: facebook.APIconfig,
   getMfaCode: () => Promise<string>,
 ): Promise<facebook.API> {
   return new Promise((resolve, reject) => {
-    return facebook(credentials, config, (err, api) => {
+    return facebook(payload, config, (err, api) => {
       if (err) {
         switch (err.error) {
           case 'login-approval':
@@ -42,9 +42,7 @@ function getApi(
               return err.continue(code);
             });
           default:
-            return reject(
-              Error(`Failed to login as [${credentials.email}]: ${err.error}`),
-            );
+            return reject(Error(`Failed to login: ${err.error}`));
         }
       }
 
@@ -85,7 +83,22 @@ class Messy {
       listenEvents: true,
     };
 
-    return getApi(credentials, config, this.getMfaCode)
+    return helpers
+      .loadAppState(settings.APPSTATE_FILE_PATH)
+      .then(appState => {
+        logger.debug('Appstate loaded successfully');
+        return { appState };
+      })
+      .catch(() => {
+        logger.debug(
+          'Appstate not found. Falling back to provided credentials',
+        );
+
+        return credentials;
+      })
+      .then(payload => {
+        return getApi(payload, config, this.getMfaCode);
+      })
       .then(api => {
         this.api = api;
 
@@ -98,6 +111,11 @@ class Messy {
         logger.debug('App state saved');
 
         this.state.authenticated = true;
+
+        return fetchUserInfo(this.api, this.api.getCurrentUserID());
+      })
+      .then(user => {
+        console.log(user);
       });
   }
 

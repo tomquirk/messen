@@ -12,7 +12,7 @@ import facebook from 'facebook-chat-api';
 export function saveAppState(
   appstate: facebook.AppState,
   filepath: string,
-): Promise<facebook.AppState | Error> {
+): Promise<facebook.AppState> {
   return new Promise((resolve, reject) =>
     mkdirp(path.dirname(filepath), mkdirpErr => {
       if (mkdirpErr) return reject(mkdirpErr);
@@ -27,6 +27,20 @@ export function saveAppState(
   );
 }
 
-module.exports = {
-  saveAppState,
-};
+export function loadAppState(filepath: string): Promise<facebook.AppState> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filepath, (appStateErr, rawAppState: Buffer) => {
+      if (appStateErr) {
+        return reject(appStateErr);
+      }
+
+      const appState = JSON.parse(rawAppState.toString());
+
+      if (!appState) {
+        return reject(Error('App state is empty'));
+      }
+
+      return resolve(appState);
+    });
+  });
+}

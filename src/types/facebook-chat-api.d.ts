@@ -1,7 +1,7 @@
 export = Facebook;
 
 declare function Facebook(
-  credentials: Facebook.Credentials,
+  payload: Facebook.Credentials | { appState: Facebook.AppState },
   options: {
     forceLogin: boolean;
     logLevel: string;
