@@ -9,7 +9,10 @@ import facebook from 'facebook-chat-api';
  * @param {string} filepath file to save appstate to
  * @return {Promise}
  */
-export function saveAppState(appstate: facebook.AppState, filepath: string) {
+export function saveAppState(
+  appstate: facebook.AppState,
+  filepath: string,
+): Promise<facebook.AppState | Error> {
   return new Promise((resolve, reject) =>
     mkdirp(path.dirname(filepath), mkdirpErr => {
       if (mkdirpErr) return reject(mkdirpErr);

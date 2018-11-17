@@ -19,7 +19,7 @@ function promptCode(): Promise<string> {
   });
 }
 
-describe('Messy', () => {
+describe('Messy', function() {
   let messy: Messy;
   beforeEach(() => {
     messy = new Messy();
@@ -28,9 +28,10 @@ describe('Messy', () => {
     };
   });
 
-  it('should be able to log in', () => {
-    messy.login(config.credentials).then(() => {
-      console.log('here');
+  it('should be able to log in', function() {
+    this.timeout(60 * 1000); // 60s timeout
+    return messy.login(config.credentials).then(() => {
+      expect(messy.state.authenticated).to.be.true;
     });
   });
 });

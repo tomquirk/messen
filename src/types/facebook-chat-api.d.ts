@@ -17,7 +17,7 @@ declare namespace Facebook {
     password: string;
   };
 
-  export interface AppState {}
+  export type AppState = Array<any>;
 
   export interface FacebookError {
     error: string;

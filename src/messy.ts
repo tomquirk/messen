@@ -9,17 +9,22 @@ import logger from './util/logger';
 class Messy {
   api: any;
   user: any;
-  state: any;
+  state: {
+    authenticated: boolean;
+  };
   options: any;
   constructor(options: any = {}) {
     this.options = options;
+    this.state = {
+      authenticated: false,
+    };
   }
 
   getMfaCode(): Promise<string | Error> {
     return Promise.reject(Error('getMfaCode not implemented'));
   }
 
-  login(credentials: facebook.Credentials): Promise<any> {
+  login(credentials: facebook.Credentials): Promise<undefined | Error> {
     const config = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
@@ -37,9 +42,8 @@ class Messy {
                   logger.debug('MFA code: ' + code);
                   return err.continue(code);
                 })
-                .catch((mfaErr: string) => reject(mfaErr));
+                .catch((mfaErr: Error) => reject(mfaErr));
             default:
-              console.log(err);
               return reject(
                 Error(
                   `Failed to login as [${credentials.email}]: ${err.error}`,
@@ -48,13 +52,17 @@ class Messy {
           }
         }
 
+        logger.debug('Successfully logged in');
+
         if (!api) {
-          return reject('api failed to load');
+          return reject(Error('api failed to load'));
         }
 
         return helpers
           .saveAppState(api.getAppState(), settings.APPSTATE_FILE_PATH)
           .then(() => {
+            logger.debug('App state saved');
+
             this.api = api;
             this.state.authenticated = true;
 
