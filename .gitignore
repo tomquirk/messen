@@ -2,7 +2,7 @@ dist/
 debug.log
 
 playground.js
-.env
+config/test.json
 
 # misc
 node_modules

@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/tomquirk/messy#readme",
   "dependencies": {
-    "dotenv": "^6.1.0",
     "facebook-chat-api": "github:Schmavery/facebook-chat-api",
     "mkdirp": "^0.5.1",
     "prompt": "^1.0.0",
