@@ -8,12 +8,12 @@ import logger from './util/logger';
 
 function fetchUserInfo(
   api: facebook.API,
-  userId: number,
+  userId: string,
 ): Promise<facebook.FacebookUser> {
   return new Promise((resolve, reject) => {
     return api.getUserInfo(
       userId,
-      (err: FacebookError, data: { [key: number]: facebook.FacebookUser }) => {
+      (err: FacebookError, data: { [key: string]: facebook.FacebookUser }) => {
         if (err) return reject(Error(err.error));
 
         logger.debug(data);
@@ -75,7 +75,7 @@ class Messy {
     return Promise.reject(Error('getMfaCode not implemented'));
   }
 
-  login(credentials: facebook.Credentials): Promise<any | Error> {
+  login(credentials: facebook.Credentials): Promise<any> {
     const config = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
@@ -115,7 +115,7 @@ class Messy {
         return fetchUserInfo(this.api, this.api.getCurrentUserID());
       })
       .then(user => {
-        console.log(user);
+        this.user = user;
       });
   }
 

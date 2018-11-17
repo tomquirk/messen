@@ -25,7 +25,16 @@ declare namespace Facebook {
   }
 
   export interface FacebookUser {
-    id: number;
+    id: string;
+    name: string;
+    firstName: string;
+    vanity: string;
+    thumbSrc: string;
+    profileUrl: string;
+    gender: number; // 1 or 2?
+    type: string;
+    isFriend: boolean;
+    isBirthday: boolean;
   }
 
   export interface APIconfig {
@@ -36,10 +45,10 @@ declare namespace Facebook {
   }
 
   export class API {
-    getCurrentUserID(): number;
+    getCurrentUserID(): string;
     getAppState(): AppState;
     getUserInfo(
-      userId: number,
+      userId: string,
       callback: (err: Facebook.FacebookError, api: any) => any,
     ): any;
   }
