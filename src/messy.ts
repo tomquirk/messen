@@ -1,4 +1,4 @@
-import facebook from 'facebook-chat-api';
+import facebook, { FacebookError } from 'facebook-chat-api';
 import fs from 'fs';
 
 import * as settings from './settings';
@@ -6,9 +6,62 @@ import * as settings from './settings';
 import * as helpers from './util/helpers';
 import logger from './util/logger';
 
+function fetchUserInfo(
+  api: facebook.API,
+  userId: number,
+): Promise<facebook.FacebookUser> {
+  return new Promise((resolve, reject) => {
+    return api.getUserInfo(
+      userId,
+      (err: FacebookError, data: { [key: number]: facebook.FacebookUser }) => {
+        if (err) return reject(Error(err.error));
+
+        logger.debug(data);
+
+        const user = data[userId];
+        user.id = userId;
+
+        return resolve(user);
+      },
+    );
+  });
+}
+
+function getApi(
+  credentials: facebook.Credentials,
+  config: facebook.APIconfig,
+  getMfaCode: () => Promise<string>,
+): Promise<facebook.API> {
+  return new Promise((resolve, reject) => {
+    return facebook(credentials, config, (err, api) => {
+      if (err) {
+        switch (err.error) {
+          case 'login-approval':
+            return getMfaCode().then((code: string) => {
+              logger.debug('MFA code: ' + code);
+              return err.continue(code);
+            });
+          default:
+            return reject(
+              Error(`Failed to login as [${credentials.email}]: ${err.error}`),
+            );
+        }
+      }
+
+      logger.debug('Successfully logged in');
+
+      if (!api) {
+        return reject(Error('api failed to load'));
+      }
+
+      return resolve(api);
+    });
+  });
+}
+
 class Messy {
-  api: any;
-  user: any;
+  api: facebook.API;
+  user: facebook.FacebookUser;
   state: {
     authenticated: boolean;
   };
@@ -20,11 +73,11 @@ class Messy {
     };
   }
 
-  getMfaCode(): Promise<string | Error> {
+  getMfaCode(): Promise<string> {
     return Promise.reject(Error('getMfaCode not implemented'));
   }
 
-  login(credentials: facebook.Credentials): Promise<undefined | Error> {
+  login(credentials: facebook.Credentials): Promise<any | Error> {
     const config = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
@@ -32,45 +85,20 @@ class Messy {
       listenEvents: true,
     };
 
-    return new Promise((resolve, reject) => {
-      facebook(credentials, config, (err, api) => {
-        if (err) {
-          switch (err.error) {
-            case 'login-approval':
-              return this.getMfaCode()
-                .then((code: string) => {
-                  logger.debug('MFA code: ' + code);
-                  return err.continue(code);
-                })
-                .catch((mfaErr: Error) => reject(mfaErr));
-            default:
-              return reject(
-                Error(
-                  `Failed to login as [${credentials.email}]: ${err.error}`,
-                ),
-              );
-          }
-        }
+    return getApi(credentials, config, this.getMfaCode)
+      .then(api => {
+        this.api = api;
 
-        logger.debug('Successfully logged in');
+        return helpers.saveAppState(
+          api.getAppState(),
+          settings.APPSTATE_FILE_PATH,
+        );
+      })
+      .then(() => {
+        logger.debug('App state saved');
 
-        if (!api) {
-          return reject(Error('api failed to load'));
-        }
-
-        return helpers
-          .saveAppState(api.getAppState(), settings.APPSTATE_FILE_PATH)
-          .then(() => {
-            logger.debug('App state saved');
-
-            this.api = api;
-            this.state.authenticated = true;
-
-            return resolve();
-          })
-          .catch(appstateErr => reject(appstateErr));
+        this.state.authenticated = true;
       });
-    });
   }
 
   logout() {
