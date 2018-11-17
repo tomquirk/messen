@@ -76,7 +76,7 @@ class Messy {
   }
 
   login(credentials: facebook.Credentials): Promise<any> {
-    const config = {
+    const apiConfig = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
       selfListen: true,
@@ -97,7 +97,7 @@ class Messy {
         return credentials;
       })
       .then(payload => {
-        return getApi(payload, config, this.getMfaCode);
+        return getApi(payload, apiConfig, this.getMfaCode);
       })
       .then(api => {
         this.api = api;
@@ -117,6 +117,10 @@ class Messy {
       .then(user => {
         this.user = user;
       });
+  }
+
+  listen(callback: (err: FacebookError, event: any) => any) {
+    return this.api.listen(callback);
   }
 
   logout() {

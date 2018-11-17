@@ -21,7 +21,7 @@ declare namespace Facebook {
 
   export interface FacebookError {
     error: string;
-    continue: (val: string) => any;
+    continue?: (val: string) => any;
   }
 
   export interface FacebookUser {
@@ -45,6 +45,7 @@ declare namespace Facebook {
   }
 
   export class API {
+    listen(callback: (err: Facebook.FacebookError, event: any) => any): any;
     getCurrentUserID(): string;
     getAppState(): AppState;
     getUserInfo(
