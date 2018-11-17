@@ -45,12 +45,19 @@ declare namespace Facebook {
   }
 
   export class API {
-    listen(callback: (err: Facebook.FacebookError, event: any) => any): any;
+    listen(
+      callback: (err: Facebook.FacebookError, event: Facebook.APIEvent) => any,
+    ): any;
     getCurrentUserID(): string;
     getAppState(): AppState;
     getUserInfo(
       userId: string,
       callback: (err: Facebook.FacebookError, api: any) => any,
     ): any;
+  }
+
+  export interface APIEvent {
+    type: string;
+    threadID: string;
   }
 }

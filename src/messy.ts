@@ -119,8 +119,27 @@ class Messy {
       });
   }
 
-  listen(callback: (err: FacebookError, event: any) => any) {
-    return this.api.listen(callback);
+  onMessage(ev: facebook.APIEvent): any {
+    return Promise.reject(Error('onMessage not implemented'));
+  }
+
+  onThreadEvent(ev: facebook.APIEvent): any {
+    return Promise.reject(Error('onThreadEvent not implemented'));
+  }
+
+  listen(): any {
+    this.api.listen((err, ev) => {
+      if (err) {
+        return logger.error(err.error);
+      }
+
+      switch (ev.type) {
+        case 'message':
+          return this.onMessage(ev);
+        case 'event':
+          return this.onThreadEvent(ev);
+      }
+    });
   }
 
   logout() {

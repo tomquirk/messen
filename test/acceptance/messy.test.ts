@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import readline from 'readline';
 
-import Messy from '../src/messy';
-import config from '../config/test.json';
+import Messy from '../../src/messy';
+import config from '../../config/test.json';
 
 function promptCode(): Promise<string> {
   const rl = readline.createInterface({
@@ -28,7 +28,7 @@ describe('Messy', function() {
     };
   });
 
-  it('should be able to log in', function() {
+  it('should be able to log in to a real Facebook account', function() {
     this.timeout(60 * 1000); // 60s timeout
     return messy.login(config.credentials).then(() => {
       expect(messy.state.authenticated).to.be.true;
