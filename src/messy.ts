@@ -14,6 +14,7 @@ if (settings.ENVIRONMENT !== 'production') {
 }
 
 const getAuth = (
+  promptCredentialsFn: () => Promise<facebook.Credentials>,
   credentials?: facebook.Credentials,
   useCache?: boolean,
 ): Promise<facebook.Credentials | { appState: facebook.AppState }> => {
@@ -21,7 +22,7 @@ const getAuth = (
     if (credentials) {
       return Promise.resolve(credentials);
     }
-    return this.promptCredentials();
+    return promptCredentialsFn();
   };
 
   if (!useCache) {
@@ -74,7 +75,7 @@ class Messy {
       listenEvents: true,
     };
 
-    return getAuth(credentials, useCache)
+    return getAuth(this.promptCredentials, credentials, useCache)
       .then(authPayload => {
         return api.getApi(authPayload, apiConfig, this.getMfaCode);
       })
