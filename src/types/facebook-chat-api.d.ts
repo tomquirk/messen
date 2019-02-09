@@ -24,18 +24,29 @@ declare namespace Facebook {
     continue?: (val: string) => any;
   }
 
-  export interface FacebookUser {
+  type FacebookBaseUser = {
+    isBirthday: boolean;
+    vanity: string;
+    isFriend: boolean;
+    type: string; // friend | ...
+    firstName: string;
+  };
+
+  export type FacebookUser = {
     id: string;
     name: string;
-    firstName: string;
-    vanity: string;
     thumbSrc: string;
     profileUrl: string;
-    gender: number; // 1 or 2?
-    type: string;
-    isFriend: boolean;
-    isBirthday: boolean;
-  }
+  } & FacebookBaseUser;
+
+  export type FacebookFriend = {
+    alternateName: string;
+    gender: string;
+    userID: string;
+    fullName: string;
+    profilePicture: string;
+    profileUrl: string;
+  } & FacebookBaseUser;
 
   export interface APIconfig {
     forceLogin: boolean;
@@ -46,14 +57,17 @@ declare namespace Facebook {
 
   export class API {
     listen(
-      callback: (err: Facebook.FacebookError, event: Facebook.APIEvent) => any,
-    ): any;
+      callback: (err: Facebook.FacebookError, event: Facebook.APIEvent) => void,
+    ): void;
     getCurrentUserID(): string;
     getAppState(): AppState;
     getUserInfo(
       userId: string,
-      callback: (err: Facebook.FacebookError, api: any) => any,
-    ): any;
+      callback: (err: Facebook.FacebookError, data: any) => void,
+    ): void;
+    getFriendsList(
+      callback: (err: Facebook.FacebookError, data: any) => void,
+    ): void;
   }
 
   export interface APIEvent {

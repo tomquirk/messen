@@ -1,65 +1,49 @@
-import facebook, { FacebookError } from 'facebook-chat-api';
+import facebook from 'facebook-chat-api';
+import messy from 'messy';
 import fs from 'fs';
 
 import * as settings from './settings';
 
 import * as helpers from './util/helpers';
-import logger from './util/logger';
+import getLogger from './util/logger';
+import api from './api';
 
-function fetchUserInfo(
-  api: facebook.API,
-  userId: string,
-): Promise<facebook.FacebookUser> {
-  return new Promise((resolve, reject) => {
-    return api.getUserInfo(
-      userId,
-      (err: FacebookError, data: { [key: string]: facebook.FacebookUser }) => {
-        if (err) return reject(Error(err.error));
-
-        logger.debug(data);
-
-        const user = data[userId];
-        user.id = userId;
-
-        return resolve(user);
-      },
-    );
-  });
+const logger = getLogger('messy');
+if (settings.ENVIRONMENT !== 'production') {
+  logger.info('Logging initialized at debug level');
 }
 
-function getApi(
-  payload: facebook.Credentials | { appState: facebook.AppState },
-  config: facebook.APIconfig,
-  getMfaCode: () => Promise<string>,
-): Promise<facebook.API> {
-  return new Promise((resolve, reject) => {
-    return facebook(payload, config, (err, api) => {
-      if (err) {
-        switch (err.error) {
-          case 'login-approval':
-            return getMfaCode().then((code: string) => {
-              logger.debug('MFA code: ' + code);
-              return err.continue(code);
-            });
-          default:
-            return reject(Error(`Failed to login: ${err.error}`));
-        }
-      }
+const getAuth = (
+  credentials?: facebook.Credentials,
+  useCache?: boolean,
+): Promise<facebook.Credentials | { appState: facebook.AppState }> => {
+  const useCredentials = () => {
+    if (credentials) {
+      return Promise.resolve(credentials);
+    }
+    return this.promptCredentials();
+  };
 
-      logger.debug('Successfully logged in');
+  if (!useCache) {
+    return useCredentials();
+  }
 
-      if (!api) {
-        return reject(Error('api failed to load'));
-      }
+  return helpers
+    .loadAppState(settings.APPSTATE_FILE_PATH)
+    .then(appState => {
+      logger.debug('Appstate loaded successfully');
+      return { appState };
+    })
+    .catch(() => {
+      logger.debug('Appstate not found. Falling back to provided credentials');
 
-      return resolve(api);
+      return useCredentials();
     });
-  });
-}
+};
 
 class Messy {
   api: facebook.API;
-  user: facebook.FacebookUser;
+  user: messy.MessyMeUser;
   state: {
     authenticated: boolean;
   };
@@ -75,8 +59,12 @@ class Messy {
     return Promise.reject(Error('getMfaCode not implemented'));
   }
 
+  promptCredentials(): Promise<facebook.Credentials> {
+    return Promise.reject(Error('promptCredentials not implemented'));
+  }
+
   login(
-    credentials: facebook.Credentials,
+    credentials?: facebook.Credentials,
     useCache: boolean = true,
   ): Promise<any> {
     const apiConfig = {
@@ -86,27 +74,9 @@ class Messy {
       listenEvents: true,
     };
 
-    const _credentials = () => {
-      return useCache
-        ? helpers
-            .loadAppState(settings.APPSTATE_FILE_PATH)
-            .then(appState => {
-              logger.debug('Appstate loaded successfully');
-              return { appState };
-            })
-            .catch(() => {
-              logger.debug(
-                'Appstate not found. Falling back to provided credentials',
-              );
-
-              return credentials;
-            })
-        : Promise.resolve(credentials);
-    };
-
-    return _credentials()
-      .then(payload => {
-        return getApi(payload, apiConfig, this.getMfaCode);
+    return getAuth(credentials, useCache)
+      .then(authPayload => {
+        return api.getApi(authPayload, apiConfig, this.getMfaCode);
       })
       .then(api => {
         this.api = api;
@@ -121,10 +91,13 @@ class Messy {
 
         this.state.authenticated = true;
 
-        return fetchUserInfo(this.api, this.api.getCurrentUserID());
+        return Promise.all([
+          api.fetchUserInfo(this.api, this.api.getCurrentUserID()),
+          api.fetchApiUserFriends(this.api),
+        ]);
       })
-      .then(user => {
-        this.user = user;
+      .then(([user, friends]) => {
+        this.user = Object.assign(user, { friends });
       });
   }
 
