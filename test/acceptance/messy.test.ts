@@ -30,7 +30,7 @@ describe('Messy', function() {
 
   it('should be able to log in to a real Facebook account', function() {
     this.timeout(60 * 1000); // 60s timeout
-    return messy.login(config.credentials).then(() => {
+    return messy.login(config.credentials, false).then(() => {
       expect(messy.state.authenticated).to.be.true;
     });
   });

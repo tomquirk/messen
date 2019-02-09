@@ -75,7 +75,10 @@ class Messy {
     return Promise.reject(Error('getMfaCode not implemented'));
   }
 
-  login(credentials: facebook.Credentials): Promise<any> {
+  login(
+    credentials: facebook.Credentials,
+    useCache: boolean = true,
+  ): Promise<any> {
     const apiConfig = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
@@ -83,19 +86,25 @@ class Messy {
       listenEvents: true,
     };
 
-    return helpers
-      .loadAppState(settings.APPSTATE_FILE_PATH)
-      .then(appState => {
-        logger.debug('Appstate loaded successfully');
-        return { appState };
-      })
-      .catch(() => {
-        logger.debug(
-          'Appstate not found. Falling back to provided credentials',
-        );
+    const _credentials = () => {
+      return useCache
+        ? helpers
+            .loadAppState(settings.APPSTATE_FILE_PATH)
+            .then(appState => {
+              logger.debug('Appstate loaded successfully');
+              return { appState };
+            })
+            .catch(() => {
+              logger.debug(
+                'Appstate not found. Falling back to provided credentials',
+              );
 
-        return credentials;
-      })
+              return credentials;
+            })
+        : Promise.resolve(credentials);
+    };
+
+    return _credentials()
       .then(payload => {
         return getApi(payload, apiConfig, this.getMfaCode);
       })
