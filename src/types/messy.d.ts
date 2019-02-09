@@ -1,5 +1,5 @@
 import facebook from 'facebook-chat-api';
 
 export type MessyMeUser = facebook.FacebookUser & {
-  friends: Array<any>;
+  friends: Array<facebook.FacebookFriend>;
 };

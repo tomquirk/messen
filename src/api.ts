@@ -18,8 +18,6 @@ function fetchUserInfo(
       (err: FacebookError, data: { [key: string]: facebook.FacebookUser }) => {
         if (err) return reject(Error(err.error));
 
-        logger.debug(data);
-
         const user = data[userId];
         user.id = userId;
 
@@ -35,7 +33,6 @@ function fetchApiUserFriends(
   return new Promise((resolve, reject) => {
     return api.getFriendsList((err: FacebookError, data: any) => {
       if (err) return reject(Error(err.error));
-      logger.debug(data);
 
       return resolve(data);
     });

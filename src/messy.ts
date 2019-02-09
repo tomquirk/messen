@@ -112,7 +112,7 @@ class Messy {
   listen(): any {
     this.api.listen((err, ev) => {
       if (err) {
-        return logger.error(err.error);
+        return logger.error(err);
       }
 
       switch (ev.type) {
