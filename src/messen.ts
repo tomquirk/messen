@@ -130,7 +130,6 @@ class Messen {
   logout(): Promise<void> {
     return new Promise((resolve, reject) => {
       fs.unlink(settings.APPSTATE_FILE_PATH, () => {
-        process.exit();
         return resolve();
       });
     });
