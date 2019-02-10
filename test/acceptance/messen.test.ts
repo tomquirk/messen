@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import readline from 'readline';
 
 import Messen from '../../src/messen';
-require('dotenv').config();
 
 function promptCode(): Promise<string> {
   const rl = readline.createInterface({
