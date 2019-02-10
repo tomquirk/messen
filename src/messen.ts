@@ -67,7 +67,7 @@ class Messen {
   login(
     credentials?: facebook.Credentials,
     useCache: boolean = true,
-  ): Promise<any> {
+  ): Promise<messen.MessenMeUser> {
     const apiConfig = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
@@ -99,18 +99,20 @@ class Messen {
       })
       .then(([user, friends]) => {
         this.user = Object.assign(user, { friends });
+
+        return this.user;
       });
   }
 
-  onMessage(ev: facebook.APIEvent): any {
-    return Promise.reject(Error('onMessage not implemented'));
+  onMessage(ev: facebook.APIEvent): void | Error {
+    return Error('onMessage not implemented');
   }
 
-  onThreadEvent(ev: facebook.APIEvent): any {
-    return Promise.reject(Error('onThreadEvent not implemented'));
+  onThreadEvent(ev: facebook.APIEvent): void | Error {
+    return Error('onThreadEvent not implemented');
   }
 
-  listen(): any {
+  listen(): void {
     this.api.listen((err, ev) => {
       if (err) {
         return logger.error(err);
@@ -125,9 +127,12 @@ class Messen {
     });
   }
 
-  logout() {
-    fs.unlink(settings.APPSTATE_FILE_PATH, () => {
-      process.exit();
+  logout(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      fs.unlink(settings.APPSTATE_FILE_PATH, () => {
+        process.exit();
+        return resolve();
+      });
     });
   }
 }
