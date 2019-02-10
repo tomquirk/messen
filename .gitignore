@@ -1,5 +1,6 @@
 dist/
 *debug.log
+.env
 
 playground.js
 config/test.json

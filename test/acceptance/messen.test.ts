@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import readline from 'readline';
 
 import Messen from '../../src/messen';
-import config from '../../config/test.json';
+require('dotenv').config();
 
 function promptCode(): Promise<string> {
   const rl = readline.createInterface({
@@ -30,8 +30,16 @@ describe('Messen', function() {
 
   it('should be able to log in to a real Facebook account', function() {
     this.timeout(60 * 1000); // 60s timeout
-    return messen.login(config.credentials, false).then(() => {
-      expect(messen.state.authenticated).to.be.true;
-    });
+    return messen
+      .login(
+        {
+          email: process.env.FACEBOOK_EMAIL,
+          password: process.env.FACEBOOK_PASSWORD,
+        },
+        false,
+      )
+      .then(() => {
+        expect(messen.state.authenticated).to.be.true;
+      });
   });
 });
