@@ -1,5 +1,5 @@
 dist/
-debug.log
+*debug.log
 
 playground.js
 config/test.json
@@ -7,5 +7,4 @@ config/test.json
 # misc
 node_modules
 .DS_Store
-npm-debug.log*
 .vscode

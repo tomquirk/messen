@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import readline from 'readline';
 
-import Messy from '../../src/messy';
+import Messen from '../../src/messen';
 import config from '../../config/test.json';
 
 function promptCode(): Promise<string> {
@@ -19,19 +19,19 @@ function promptCode(): Promise<string> {
   });
 }
 
-describe('Messy', function() {
-  let messy: Messy;
+describe('Messen', function() {
+  let messen: Messen;
   beforeEach(() => {
-    messy = new Messy();
-    messy.getMfaCode = () => {
+    messen = new Messen();
+    messen.getMfaCode = () => {
       return promptCode();
     };
   });
 
   it('should be able to log in to a real Facebook account', function() {
     this.timeout(60 * 1000); // 60s timeout
-    return messy.login(config.credentials, false).then(() => {
-      expect(messy.state.authenticated).to.be.true;
+    return messen.login(config.credentials, false).then(() => {
+      expect(messen.state.authenticated).to.be.true;
     });
   });
 });

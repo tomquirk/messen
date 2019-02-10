@@ -1,5 +1,5 @@
 import facebook from 'facebook-chat-api';
 
-export type MessyMeUser = facebook.FacebookUser & {
+export type MessenMeUser = facebook.FacebookUser & {
   friends: Array<facebook.FacebookFriend>;
 };

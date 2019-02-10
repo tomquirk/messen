@@ -1,5 +1,5 @@
 import facebook from 'facebook-chat-api';
-import messy from 'messy';
+import messen from 'messen';
 import fs from 'fs';
 
 import * as settings from './settings';
@@ -8,7 +8,7 @@ import * as helpers from './util/helpers';
 import getLogger from './util/logger';
 import api from './api';
 
-const logger = getLogger('messy');
+const logger = getLogger('messen');
 if (settings.ENVIRONMENT !== 'production') {
   logger.info('Logging initialized at debug level');
 }
@@ -42,9 +42,9 @@ const getAuth = (
     });
 };
 
-class Messy {
+class Messen {
   api: facebook.API;
-  user: messy.MessyMeUser;
+  user: messen.MessenMeUser;
   state: {
     authenticated: boolean;
   };
@@ -132,4 +132,4 @@ class Messy {
   }
 }
 
-export = Messy;
+export = Messen;
