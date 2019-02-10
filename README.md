@@ -34,3 +34,7 @@ messen.login({ email: 'test@mailnator.com', password: 'P4ssw0rd' }).then(() => {
   messen.listen();
 });
 ```
+
+## Projects using `messen`
+
+* [Messer](https://github.com/mjkaufer/Messer) - a CLI chat application for Facebook Messenger
