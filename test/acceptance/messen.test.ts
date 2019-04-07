@@ -18,7 +18,7 @@ function promptCode(): Promise<string> {
   });
 }
 
-describe('Messen', function() {
+describe('Messen', function () {
   let messen: Messen;
   beforeEach(() => {
     messen = new Messen();
@@ -27,18 +27,13 @@ describe('Messen', function() {
     };
   });
 
-  it('should be able to log in to a real Facebook account', function() {
+  it('should be able to log in to a real Facebook account', async function () {
     this.timeout(60 * 1000); // 60s timeout
-    return messen
-      .login(
-        {
-          email: process.env.FACEBOOK_EMAIL,
-          password: process.env.FACEBOOK_PASSWORD,
-        },
-        false,
-      )
-      .then(() => {
-        expect(messen.state.authenticated).to.be.true;
-      });
+    await messen
+      .login({
+        email: process.env.FACEBOOK_EMAIL,
+        password: process.env.FACEBOOK_PASSWORD,
+      }, false);
+    expect(messen.state.authenticated).to.be.true;
   });
 });

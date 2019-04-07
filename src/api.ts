@@ -8,6 +8,7 @@ const logger = getLogger('api');
 if (settings.ENVIRONMENT !== 'production') {
   logger.info('Logging initialized at debug level');
 }
+
 function fetchUserInfo(
   api: facebook.API,
   userId: string,
@@ -32,6 +33,34 @@ function fetchApiUserFriends(
 ): Promise<Array<facebook.FacebookFriend>> {
   return new Promise((resolve, reject) => {
     return api.getFriendsList((err: FacebookError, data: any) => {
+      if (err) return reject(Error(err.error));
+
+      return resolve(data);
+    });
+  });
+}
+
+function fetchThreadInfo(
+  api: facebook.API,
+  threadId: string
+): Promise<facebook.FacebookThread> {
+  return new Promise((resolve, reject) => {
+    return api.getThreadInfo(threadId, (err: FacebookError, data: any) => {
+      if (err) return reject(Error(err.error));
+
+      return resolve(data);
+    });
+  });
+}
+
+function fetchThreads(
+  api: facebook.API,
+  limit: number,
+  timestamp: string = null,
+  tags: facebook.ThreadListTagQuery = []
+): Promise<Array<facebook.FacebookThread>> {
+  return new Promise((resolve, reject) => {
+    return api.getThreadList(limit, timestamp, tags, (err: FacebookError, data: any) => {
       if (err) return reject(Error(err.error));
 
       return resolve(data);
@@ -70,7 +99,9 @@ function getApi(
 }
 
 export default {
-  fetchApiUserFriends,
   getApi,
+  fetchApiUserFriends,
   fetchUserInfo,
+  fetchThreadInfo,
+  fetchThreads
 };
