@@ -46,7 +46,7 @@ export class ThreadStore {
     return thread;
   }
 
-  async refreshThreads() {
+  async refresh() {
     const threads = await api.fetchThreads(this._api, THREAD_QUERY_COUNT);
     threads.forEach(thread => {
       this._upsertThread(thread);

@@ -7,6 +7,7 @@ import * as settings from './settings';
 import * as helpers from './util/helpers';
 import getLogger from './util/logger';
 import api from './api';
+import { ThreadStore } from './store/threads'
 
 const logger = getLogger('messen');
 if (settings.ENVIRONMENT !== 'production') {
@@ -48,7 +49,7 @@ class Messen {
   };
   store: {
     user: messen.MessenMeUser;
-    threads: Array<facebook.FacebookThread>
+    threads: ThreadStore
   }
   options: any;
   constructor(options: any = {}) {
@@ -86,7 +87,9 @@ class Messen {
     const [user, friends] = await Promise.all([
       api.fetchUserInfo(this.api, this.api.getCurrentUserID()),
       api.fetchApiUserFriends(this.api),
+      this.store.threads.refresh() // refresh thread store
     ]);
+    console.log(this.store)
     this.store.user = Object.assign(user, { friends });
     return this.store.user;
   }
