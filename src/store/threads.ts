@@ -33,9 +33,16 @@ export class ThreadStore {
     return this._threads[id]
   }
 
-  _getThreadByName(name: string): facebook.FacebookThread {
-    const threadId = this._threadNameToId[name]
-    if (!threadId) return
+  _getThreadByName(nameQuery: string): facebook.FacebookThread {
+    let threadId = this._threadNameToId[nameQuery]
+    if (!threadId) {
+      const threadName = Object.keys(this._threadNameToId).find(name =>
+        name.toLowerCase().startsWith(nameQuery.toLowerCase()),
+      );
+      threadId = this._threadNameToId[threadName]
+    }
+
+    if (!threadId) return null
 
     return this._threads[threadId]
   }
@@ -62,13 +69,17 @@ export class ThreadStore {
       thread = this._getThreadByName(name)
     }
 
-    if (!query.id) return Promise.reject('Thread ID required in query')
-
     if (query.id) {
       thread = this._getThreadById(query.id)
+    } else if (query.name) {
+      thread = this._getThreadByName(name)
+    } else {
+      return Promise.reject('Invalid params')
     }
 
     if (thread) return Promise.resolve(thread)
+
+    if (!query.id) return Promise.reject('Invalid params')
 
     return await this._refreshThread(query.id)
   }
