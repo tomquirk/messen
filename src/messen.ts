@@ -57,6 +57,10 @@ class Messen {
     this.state = {
       authenticated: false,
     };
+    this.store = {
+      user: undefined,
+      threads: undefined
+    }
   }
 
   getMfaCode(): Promise<string> {
@@ -84,6 +88,11 @@ class Messen {
     logger.debug('App state saved');
     this.state.authenticated = true;
 
+    this.store = {
+      user: undefined,
+      threads: new ThreadStore(this.api)
+    }
+
     const [user, friends] = await Promise.all([
       api.fetchUserInfo(this.api, this.api.getCurrentUserID()),
       api.fetchApiUserFriends(this.api),
@@ -108,12 +117,18 @@ class Messen {
         return logger.error(err);
       }
 
-      switch (ev.type) {
-        case 'message':
-          return this.onMessage(ev);
-        case 'event':
-          return this.onThreadEvent(ev);
-      }
+      return this.store.threads.getThread({ id: ev.threadID }).then(thread => {
+        const messenEvent = Object.assign(ev, {
+          thread
+        })
+
+        switch (messenEvent.type) {
+          case 'message':
+            return this.onMessage(messenEvent);
+          case 'event':
+            return this.onThreadEvent(messenEvent);
+        }
+      })
     });
   }
 

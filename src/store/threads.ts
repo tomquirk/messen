@@ -2,8 +2,8 @@ import facebook from 'facebook-chat-api';
 import api from '../api';
 
 type ThreadQuery = {
-  id: string,
-  name: string
+  id?: string
+  name?: string
 }
 
 const THREAD_QUERY_COUNT = 20
@@ -24,6 +24,7 @@ export class ThreadStore {
   }
 
   _upsertThread(thread: facebook.FacebookThread): void {
+    console.log('here', thread)
     this._threads[thread.threadID] = thread
     this._threadNameToId[thread.name] = thread.threadID
   }
@@ -48,6 +49,7 @@ export class ThreadStore {
 
   async refresh() {
     const threads = await api.fetchThreads(this._api, THREAD_QUERY_COUNT);
+    console.log(`got ${threads.length} threads`)
     threads.forEach(thread => {
       this._upsertThread(thread);
     });
@@ -56,20 +58,18 @@ export class ThreadStore {
   async getThread(query: ThreadQuery): Promise<facebook.FacebookThread> {
     let thread = undefined;
 
-    const { id, name } = query
-
-    if (id) {
-      thread = this._getThreadById(id)
+    if (query.name) {
+      thread = this._getThreadByName(name)
     }
 
-    if (name) {
-      thread = this._getThreadByName(name)
+    if (!query.id) return Promise.reject('Thread ID required in query')
+
+    if (query.id) {
+      thread = this._getThreadById(query.id)
     }
 
     if (thread) return Promise.resolve(thread)
 
-    if (!id) return Promise.reject('Thread ID required in query')
-
-    return await this._refreshThread(id)
+    return await this._refreshThread(query.id)
   }
 }
