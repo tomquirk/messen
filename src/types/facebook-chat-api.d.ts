@@ -48,8 +48,11 @@ declare namespace Facebook {
     profileUrl: string;
   } & FacebookBaseUser;
 
-  export type FacebookThread = {
-    threadID: string,
+  export type BaseFacebookThread = {
+    threadID: string
+  }
+
+  export type FacebookThread = BaseFacebookThread & {
     participantIDs: Array<string>,
     name: string, // name of thread (usually name of user)
     nicknames: {
@@ -105,6 +108,9 @@ declare namespace Facebook {
       timestamp: string,
       tags: ThreadListTagQuery,
       callback: (err: Facebook.FacebookError, data: any) => void
+    ): void;
+    logout(
+      callback: (err: Facebook.FacebookError) => void
     ): void
   }
 

@@ -90,7 +90,7 @@ class Messen {
 
     this.store = {
       user: undefined,
-      threads: new ThreadStore(this.api)
+      threads: new ThreadStore(this.api, this.store.user.friends)
     }
 
     const [user, friends] = await Promise.all([
@@ -98,7 +98,7 @@ class Messen {
       api.fetchApiUserFriends(this.api),
       this.store.threads.refresh() // refresh thread store
     ]);
-    console.log(this.store)
+    console.log(this.store.threads, friends)
     this.store.user = Object.assign(user, { friends });
     return this.store.user;
   }
@@ -117,6 +117,7 @@ class Messen {
         return logger.error(err);
       }
 
+      // inject thread data in to event
       return this.store.threads.getThread({ id: ev.threadID }).then(thread => {
         const messenEvent = Object.assign(ev, {
           thread
@@ -132,12 +133,22 @@ class Messen {
     });
   }
 
-  logout(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      fs.unlink(settings.APPSTATE_FILE_PATH, () => {
-        return resolve();
+  async logout(): Promise<void> {
+    const clearAppState = (): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        fs.unlink(settings.APPSTATE_FILE_PATH, (err) => {
+          if (err) return reject(err)
+          return resolve();
+        });
       });
-    });
+    }
+
+    await Promise.all([
+      api.logout(this.api),
+      clearAppState()
+    ]);
+
+    this.state.authenticated = false;
   }
 }
 

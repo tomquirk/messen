@@ -68,6 +68,18 @@ function fetchThreads(
   });
 }
 
+function logout(
+  api: facebook.API
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    return api.logout((err: FacebookError) => {
+      if (err) return reject(Error(err.error));
+
+      return resolve();
+    });
+  })
+}
+
 function getApi(
   payload: facebook.Credentials | { appState: facebook.AppState },
   config: facebook.APIconfig,
@@ -103,5 +115,6 @@ export default {
   fetchApiUserFriends,
   fetchUserInfo,
   fetchThreadInfo,
-  fetchThreads
+  fetchThreads,
+  logout
 };
