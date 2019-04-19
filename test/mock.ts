@@ -1,6 +1,7 @@
 import facebook from 'facebook-chat-api';
-import messen from 'messen';
 import { ThreadStore } from '../src/store/threads'
+import { UserStore } from '../src/store/users'
+import { facebookFriendToUser } from '../src/util/transformers'
 
 const threads: Array<facebook.FacebookThread> = [
   {
@@ -81,8 +82,14 @@ const meUser: facebook.FacebookUser = {
   id: '100035969370185',
 };
 
+const _users = friends.map(facebookFriendToUser).reduce((a: { [_: string]: facebook.FacebookUser }, b: facebook.FacebookUser) => {
+  a[b.id] = b
+  return a
+}, {})
+
 const users: { [_: string]: facebook.FacebookUser } = {
   [meUser.id]: meUser,
+  ..._users
 };
 
 export function getApi(): facebook.API {
@@ -97,7 +104,7 @@ export function getApi(): facebook.API {
     logout(cb) {
       return cb(undefined);
     },
-    getThreadInfo(threadId, cb) {
+    getThreadInfo(threadId: string, cb) {
       return cb(undefined, threads.find(t => t.threadID === threadId));
     },
     getThreadList(limit, timestamp, tags, cb) {
@@ -106,18 +113,23 @@ export function getApi(): facebook.API {
     getFriendsList(cb) {
       return cb(undefined, friends);
     },
-    getUserInfo(userId, cb) {
-      return cb(undefined, users[userId]);
+    getUserInfo(userId: string, cb) {
+      return cb(undefined, { [userId]: users[userId] });
     },
 
   };
 }
 
 export function getThreadStore() {
-  const user = Object.assign(meUser, { friends })
-  const threadStore = new ThreadStore(getApi(), user)
+  const threadStore = new ThreadStore(getApi())
   threadStore.refresh()
   return threadStore;
+}
+
+export function getUserStore() {
+  const userStore = new UserStore(getApi())
+  userStore.refresh()
+  return userStore;
 }
 
 // TODO(tom) make a Messen interface
@@ -128,22 +140,29 @@ export function getMessen(): any {
       authenticated: boolean;
     };
     store: {
-      user: messen.MessenMeUser;
+      users: UserStore;
       threads: ThreadStore
     }
     options: any;
     constructor() {
       this.api = getApi();
       this.state = {
-        authenticated: true
+        authenticated: false
       };
 
-      const user = Object.assign(meUser, { friends })
-
       this.store = {
-        user,
-        threads: new ThreadStore(this.api, user)
+        users: new UserStore(this.api),
+        threads: new ThreadStore(this.api)
       }
+    }
+
+    async login() {
+      this.state.authenticated = true
+
+      return await Promise.all([
+        this.store.users.refresh(),
+        this.store.threads.refresh()
+      ])
     }
   }
 

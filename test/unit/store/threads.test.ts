@@ -36,11 +36,4 @@ describe('Thread Store', function () {
       expect(thread.threadID).to.equal('100003961877411')
     })
   });
-
-  it('should be able to get a thread by name when thread doesnt exist but friend does', async function () {
-    threadStore.getThread({ name: 'test friend' }).then(thread => {
-      expect(thread).to.exist;
-      expect(thread.threadID).to.equal('12345')
-    })
-  });
 });

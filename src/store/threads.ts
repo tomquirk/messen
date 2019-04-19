@@ -1,5 +1,4 @@
 import facebook from 'facebook-chat-api';
-import messen from 'messen';
 import api from '../api';
 
 type ThreadQuery = {
@@ -17,12 +16,10 @@ export class ThreadStore {
     [name: string]: string
   }
   _api: facebook.API
-  _user: messen.MessenMeUser | undefined
 
-  constructor(api: facebook.API, user?: messen.MessenMeUser
+  constructor(api: facebook.API
   ) {
     this._api = api;
-    this._user = user;
     this._threads = {}
     this._threadNameToId = {}
   }
@@ -50,28 +47,11 @@ export class ThreadStore {
     return this._threads[threadId]
   }
 
-  _getFriendAsThread(nameQuery: string): facebook.BaseFacebookThread | undefined {
-    if (!this._user) return
-    const friend = this._user.friends.find(friend =>
-      friend.fullName.toLowerCase().startsWith(nameQuery.toLowerCase()),
-    );
-    if (!friend) return
-
-    return {
-      threadID: friend.userID,
-      name: friend.fullName
-    }
-  }
-
   async _refreshThread(id: string): Promise<facebook.FacebookThread> {
     const thread = await api.fetchThreadInfo(this._api, id);
     // add thread to store
     this._upsertThread(thread);
     return thread;
-  }
-
-  setUser(user: messen.MessenMeUser): void {
-    this._user = user
   }
 
   async refresh() {
@@ -84,19 +64,11 @@ export class ThreadStore {
   async getThread(query: ThreadQuery): Promise<facebook.BaseFacebookThread> {
     let thread = undefined;
     const { name, id } = query
-    console.log('QUERY:', query)
-    // look for ID, then for name, then check friends list
+    // look for ID, then for name
     if (id) {
       thread = this._getThreadById(id)
     } else if (name) {
       thread = this._getThreadByName(name)
-    } else {
-      return Promise.reject('Invalid params')
-    }
-    if (thread) return Promise.resolve(thread)
-
-    if (name) {
-      thread = this._getFriendAsThread(name)
     }
 
     if (thread) return Promise.resolve(thread)

@@ -1,12 +1,15 @@
 import facebook from 'facebook-chat-api';
-import messen from 'messen';
 
 import * as settings from './settings';
 
+import { ThreadStore } from './store/threads'
+import { UserStore } from './store/users';
+
 import * as helpers from './util/helpers';
+import { facebookFriendToUser } from './util/transformers';
 import getLogger from './util/logger';
 import api from './api';
-import { ThreadStore } from './store/threads'
+
 
 const logger = getLogger('messen');
 if (settings.ENVIRONMENT !== 'production') {
@@ -47,8 +50,8 @@ export class Messen {
     authenticated: boolean;
   };
   store: {
-    user: messen.MessenMeUser;
-    threads: ThreadStore
+    threads: ThreadStore,
+    users: UserStore
   }
   options: any;
   constructor(options: any = {}) {
@@ -57,8 +60,8 @@ export class Messen {
       authenticated: false,
     };
     this.store = {
-      user: undefined,
-      threads: undefined
+      threads: undefined,
+      users: undefined
     }
   }
 
@@ -73,7 +76,7 @@ export class Messen {
   async login(
     credentials?: facebook.Credentials,
     useCache: boolean = true,
-  ): Promise<messen.MessenMeUser> {
+  ): Promise<void> {
     const apiConfig = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
@@ -88,20 +91,14 @@ export class Messen {
     this.state.authenticated = true;
 
     this.store = {
-      user: undefined,
-      threads: new ThreadStore(this.api)
+      threads: new ThreadStore(this.api),
+      users: new UserStore(this.api)
     }
 
-    const [user, friends] = await Promise.all([
-      api.fetchUserInfo(this.api, this.api.getCurrentUserID()),
-      api.fetchApiUserFriends(this.api),
-      this.store.threads.refresh() // refresh thread store
+    await Promise.all([
+      this.store.threads.refresh(),
+      this.store.users.refresh()
     ]);
-
-    this.store.user = Object.assign(user, { friends });
-    this.store.threads.setUser(this.store.user)
-
-    return this.store.user;
   }
 
   onMessage(ev: facebook.MessageEvent): void | Error {

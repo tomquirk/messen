@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import readline from 'readline';
 
-import Messen from '../../src/messen';
+import { Messen } from '../../src/messen';
 
 function promptCode(): Promise<string> {
   const rl = readline.createInterface({

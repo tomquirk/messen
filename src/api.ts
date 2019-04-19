@@ -28,6 +28,26 @@ function fetchUserInfo(
   });
 }
 
+function fetchUserInfoBatch(
+  api: facebook.API,
+  userIds: Array<string>,
+): Promise<Array<facebook.FacebookUser>> {
+  return new Promise((resolve, reject) => {
+    return api.getUserInfo(
+      userIds,
+      (err: FacebookError, data: { [key: string]: facebook.FacebookUser }) => {
+        if (err) return reject(Error(err.error));
+
+        const users = Object.keys(data).map(k => {
+          return Object.assign(data[k], { id: k })
+        })
+
+        return resolve(users);
+      },
+    );
+  });
+}
+
 function fetchApiUserFriends(
   api: facebook.API,
 ): Promise<Array<facebook.FacebookFriend>> {
@@ -113,6 +133,7 @@ export default {
   getApi,
   fetchApiUserFriends,
   fetchUserInfo,
+  fetchUserInfoBatch,
   fetchThreadInfo,
   fetchThreads,
   logout

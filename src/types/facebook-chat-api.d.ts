@@ -37,9 +37,10 @@ declare namespace Facebook {
     name: string;
     thumbSrc: string;
     profileUrl: string;
-    gender: 2;
+    gender: string | number; // TODO fix this...
   } & FacebookBaseUser;
 
+  // avoid this type (transform it to a FacebookUser)
   export type FacebookFriend = {
     alternateName: string;
     gender: string;
@@ -103,7 +104,7 @@ declare namespace Facebook {
     getCurrentUserID(): string;
     getAppState(): AppState;
     getUserInfo(
-      userId: string,
+      userId: string | Array<string>,
       callback: (err: Facebook.FacebookError, data: any) => void,
     ): void;
     getFriendsList(
