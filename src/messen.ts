@@ -41,7 +41,7 @@ const getAuth = async (
   }
 };
 
-class Messen {
+export class Messen {
   api: facebook.API;
   state: {
     authenticated: boolean;
@@ -101,8 +101,6 @@ class Messen {
     this.store.user = Object.assign(user, { friends });
     this.store.threads.setUser(this.store.user)
 
-    console.log(this.store.threads, friends)
-
     return this.store.user;
   }
 
@@ -145,5 +143,3 @@ class Messen {
     this.state.authenticated = false;
   }
 }
-
-export = Messen;

@@ -51,11 +51,11 @@ declare namespace Facebook {
 
   export type BaseFacebookThread = {
     threadID: string
+    name: string, // name of thread (usually name of user)
   }
 
   export type FacebookThread = BaseFacebookThread & {
     participantIDs: Array<string>,
-    name: string, // name of thread (usually name of user)
     nicknames: Array<any>,
     unreadCount: number,
     messageCount: number,

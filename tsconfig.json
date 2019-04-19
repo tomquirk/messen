@@ -14,5 +14,5 @@
       "*": ["node_modules/*", "src/types/*"]
     }
   },
-  "include": ["src/**/*", "test/mock.ts"]
+  "include": ["src/**/*"]
 }

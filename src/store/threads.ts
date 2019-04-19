@@ -58,7 +58,8 @@ export class ThreadStore {
     if (!friend) return
 
     return {
-      threadID: friend.userID
+      threadID: friend.userID,
+      name: friend.fullName
     }
   }
 
@@ -83,7 +84,7 @@ export class ThreadStore {
   async getThread(query: ThreadQuery): Promise<facebook.BaseFacebookThread> {
     let thread = undefined;
     const { name, id } = query
-
+    console.log('QUERY:', query)
     // look for ID, then for name, then check friends list
     if (id) {
       thread = this._getThreadById(id)
@@ -94,7 +95,10 @@ export class ThreadStore {
     }
     if (thread) return Promise.resolve(thread)
 
-    thread = this._getFriendAsThread(name)
+    if (name) {
+      thread = this._getFriendAsThread(name)
+    }
+
     if (thread) return Promise.resolve(thread)
 
     if (!id) return Promise.reject('Invalid params')
