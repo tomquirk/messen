@@ -37,6 +37,7 @@ declare namespace Facebook {
     name: string;
     thumbSrc: string;
     profileUrl: string;
+    gender: 2;
   } & FacebookBaseUser;
 
   export type FacebookFriend = {
@@ -55,9 +56,7 @@ declare namespace Facebook {
   export type FacebookThread = BaseFacebookThread & {
     participantIDs: Array<string>,
     name: string, // name of thread (usually name of user)
-    nicknames: {
-      [userID: string]: string
-    },
+    nicknames: Array<any>,
     unreadCount: number,
     messageCount: number,
     imageSrc: string,
@@ -65,7 +64,7 @@ declare namespace Facebook {
     muteUntil: string,
     isGroup: boolean,
     isSubscribed: boolean,
-    folder: "inbox" | "archive",
+    folder: "INBOX" | "ARCHIVE",
     isArchived: boolean,
     cannotReplyReason: string,
     lastReadTimestamp: string,
@@ -73,7 +72,18 @@ declare namespace Facebook {
       emoji: string
     },
     color: string,
-    adminIDs: Array<string>
+    adminIDs: Array<string>,
+    participants: Array<any>,
+    customizationEnabled: boolean,
+    participantAddMode: string | null,
+    montageThread: any,
+    reactionsMuteMode: 'REACTIONS_NOT_MUTED',
+    mentionsMuteMode: 'MENTIONS_NOT_MUTED',
+    snippet: string,
+    snippetAttachments: Array<any>,
+    snippetSender: string,
+    lastMessageTimestamp: string,
+    threadType: number
   }
 
   export interface APIconfig {

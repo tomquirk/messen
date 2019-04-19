@@ -1,6 +1,5 @@
 import facebook from 'facebook-chat-api';
 import messen from 'messen';
-import fs from 'fs';
 
 import * as settings from './settings';
 
@@ -90,7 +89,7 @@ class Messen {
 
     this.store = {
       user: undefined,
-      threads: new ThreadStore(this.api, this.store.user.friends)
+      threads: new ThreadStore(this.api)
     }
 
     const [user, friends] = await Promise.all([
@@ -98,8 +97,12 @@ class Messen {
       api.fetchApiUserFriends(this.api),
       this.store.threads.refresh() // refresh thread store
     ]);
-    console.log(this.store.threads, friends)
+
     this.store.user = Object.assign(user, { friends });
+    this.store.threads.setUser(this.store.user)
+
+    console.log(this.store.threads, friends)
+
     return this.store.user;
   }
 
@@ -134,18 +137,9 @@ class Messen {
   }
 
   async logout(): Promise<void> {
-    const clearAppState = (): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        fs.unlink(settings.APPSTATE_FILE_PATH, (err) => {
-          if (err) return reject(err)
-          return resolve();
-        });
-      });
-    }
-
     await Promise.all([
       api.logout(this.api),
-      clearAppState()
+      helpers.clearAppState(settings.APPSTATE_FILE_PATH)
     ]);
 
     this.state.authenticated = false;

@@ -62,7 +62,6 @@ function fetchThreads(
   return new Promise((resolve, reject) => {
     return api.getThreadList(limit, timestamp, tags, (err: FacebookError, data: any) => {
       if (err) return reject(Error(err.error));
-
       return resolve(data);
     });
   });

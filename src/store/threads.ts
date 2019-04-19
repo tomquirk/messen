@@ -1,4 +1,5 @@
 import facebook from 'facebook-chat-api';
+import messen from 'messen';
 import api from '../api';
 
 type ThreadQuery = {
@@ -16,12 +17,12 @@ export class ThreadStore {
     [name: string]: string
   }
   _api: facebook.API
-  _friends: Array<facebook.FacebookFriend>
+  _user: messen.MessenMeUser | undefined
 
-  constructor(api: facebook.API, friends: Array<facebook.FacebookFriend>
+  constructor(api: facebook.API, user?: messen.MessenMeUser
   ) {
     this._api = api;
-    this._friends = friends;
+    this._user = user;
     this._threads = {}
     this._threadNameToId = {}
   }
@@ -50,10 +51,10 @@ export class ThreadStore {
   }
 
   _getFriendAsThread(nameQuery: string): facebook.BaseFacebookThread | undefined {
-    const friend = this._friends.find(friend =>
+    if (!this._user) return
+    const friend = this._user.friends.find(friend =>
       friend.fullName.toLowerCase().startsWith(nameQuery.toLowerCase()),
     );
-
     if (!friend) return
 
     return {
@@ -68,9 +69,12 @@ export class ThreadStore {
     return thread;
   }
 
+  setUser(user: messen.MessenMeUser): void {
+    this._user = user
+  }
+
   async refresh() {
     const threads = await api.fetchThreads(this._api, THREAD_QUERY_COUNT);
-    console.log(`got ${threads.length} threads`)
     threads.forEach(thread => {
       this._upsertThread(thread);
     });

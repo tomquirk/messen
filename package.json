@@ -11,7 +11,8 @@
     "start": "node index.js",
     "build-ts": "tsc",
     "dev": "npm run build-ts && npm start",
-    "test": "mocha -r ts-node/register test/**/*.test.ts"
+    "test": "mocha -r ts-node/register test/**/*.test.ts",
+    "test-unit": "mocha -r ts-node/register test/unit/**/*.test.ts"
   },
   "repository": {
     "type": "git",
