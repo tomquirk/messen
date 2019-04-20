@@ -1,4 +1,4 @@
-import facebook from 'facebook-chat-api';
+import facebook, { FacebookUser } from 'facebook-chat-api';
 import { ThreadStore } from '../src/store/threads'
 import { UserStore } from '../src/store/users'
 import { facebookFriendToUser } from '../src/util/transformers'
@@ -34,7 +34,7 @@ const threads: Array<facebook.FacebookThread> = [
     cannotReplyReason: null,
     participantIDs: ['100003961877411', '100035969370185'],
     threadType: 1,
-  },
+  }
 ]
 
 const friends: Array<facebook.FacebookFriend> = [
@@ -65,7 +65,7 @@ const friends: Array<facebook.FacebookFriend> = [
     profileUrl: 'https://www.facebook.com/tom.quirk.100',
     vanity: 'tom.quirk.100',
     isBirthday: false,
-  },
+  }
 ];
 
 const meUser: facebook.FacebookUser = {
@@ -113,10 +113,15 @@ export function getApi(): facebook.API {
     getFriendsList(cb) {
       return cb(undefined, friends);
     },
-    getUserInfo(userId: string, cb) {
+    getUserInfo(userId: string | Array<string>, cb) {
+      if (Array.isArray(userId)) {
+        return cb(undefined, Object.keys(users).reduce((a: { [_: string]: FacebookUser }, id) => {
+          a[id] = users[id]
+          return a
+        }, {}))
+      }
       return cb(undefined, { [userId]: users[userId] });
     },
-
   };
 }
 

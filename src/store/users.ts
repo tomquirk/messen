@@ -105,4 +105,27 @@ export class UserStore {
     return await this._refreshUser(id)
   }
 
+  async getUsers(userIds: Array<string>): Promise<Array<facebook.FacebookUser>> {
+    const cachedUsers = userIds.map((id) => this._getUserById(id))
+    const missingUserIds = cachedUsers.map((val, i) => {
+      if (val) return
+
+      return userIds[i]
+    }).filter(Boolean)
+
+    let fetchedUsers: Array<facebook.FacebookUser> = []
+
+    if (missingUserIds.length > 0) {
+      // fetch any users we dont have cached
+      const fetchedUsers = await api.fetchUserInfoBatch(this._api, missingUserIds)
+      fetchedUsers.forEach(user => {
+        this._upsertUser(user)
+      })
+    }
+
+    const allUsers = [...cachedUsers.filter(Boolean), ...fetchedUsers]
+
+    // return in order asked for
+    return userIds.map(id => allUsers.find(user => user.id === id))
+  }
 }

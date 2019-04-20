@@ -31,7 +31,7 @@ describe('Thread Store', function () {
   });
 
   it('should be able to get a thread by id when query contains both name and id', async function () {
-    await threadStore.getThread({ id: '100003961877411', name: 'ahhaha' }).catch(thread => {
+    await threadStore.getThread({ id: '100003961877411', name: 'ahhaha' }).then(thread => {
       expect(thread).to.exist;
       expect(thread.threadID).to.equal('100003961877411')
     })

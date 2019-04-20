@@ -26,6 +26,7 @@ export class ThreadStore {
 
   _upsertThread(thread: facebook.FacebookThread): void {
     this._threads[thread.threadID] = thread
+    // TODO(tom) need to check if threadname is `null`
     this._threadNameToId[thread.name] = thread.threadID
   }
 
@@ -76,5 +77,9 @@ export class ThreadStore {
     if (!id) return Promise.reject('Invalid params')
 
     return await this._refreshThread(id)
+  }
+
+  getThreadList(limit?: number): Array<facebook.BaseFacebookThread> {
+    return Object.values(this._threads).slice(0, limit)
   }
 }
