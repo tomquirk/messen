@@ -24,10 +24,18 @@ export class ThreadStore {
     this._threadNameToId = {}
   }
 
+  _cleanThread(thread: facebook.FacebookThread): facebook.FacebookThread {
+    if (thread.isGroup && thread.name === null) {
+      const participantNames = thread.participants.filter(user => user.id !== this._api.getCurrentUserID()).map(user => user.name).join(', ')
+      thread.name = `(group) ${participantNames}`
+    }
+    return thread
+  }
+
   _upsertThread(thread: facebook.FacebookThread): void {
-    this._threads[thread.threadID] = thread
-    // TODO(tom) need to check if threadname is `null`
-    this._threadNameToId[thread.name] = thread.threadID
+    const cleanThread = this._cleanThread(thread)
+    this._threads[cleanThread.threadID] = cleanThread
+    this._threadNameToId[cleanThread.name] = cleanThread.threadID
   }
 
   _getThreadById(id: string): facebook.FacebookThread | undefined {
