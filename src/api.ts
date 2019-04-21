@@ -8,6 +8,7 @@ const logger = getLogger('api');
 if (settings.ENVIRONMENT !== 'production') {
   logger.info('Logging initialized at debug level');
 }
+
 function fetchUserInfo(
   api: facebook.API,
   userId: string,
@@ -27,6 +28,26 @@ function fetchUserInfo(
   });
 }
 
+function fetchUserInfoBatch(
+  api: facebook.API,
+  userIds: Array<string>,
+): Promise<Array<facebook.FacebookUser>> {
+  return new Promise((resolve, reject) => {
+    return api.getUserInfo(
+      userIds,
+      (err: FacebookError, data: { [key: string]: facebook.FacebookUser }) => {
+        if (err) return reject(Error(err.error));
+
+        const users = Object.keys(data).map(k => {
+          return Object.assign(data[k], { id: k })
+        })
+
+        return resolve(users);
+      },
+    );
+  });
+}
+
 function fetchApiUserFriends(
   api: facebook.API,
 ): Promise<Array<facebook.FacebookFriend>> {
@@ -37,6 +58,45 @@ function fetchApiUserFriends(
       return resolve(data);
     });
   });
+}
+
+function fetchThreadInfo(
+  api: facebook.API,
+  threadId: string
+): Promise<facebook.FacebookThread> {
+  return new Promise((resolve, reject) => {
+    return api.getThreadInfo(threadId, (err: FacebookError, data: any) => {
+      if (err) return reject(Error(err.error));
+
+      return resolve(data);
+    });
+  });
+}
+
+function fetchThreads(
+  api: facebook.API,
+  limit: number,
+  timestamp: string = null,
+  tags: facebook.ThreadListTagQuery = []
+): Promise<Array<facebook.FacebookThread>> {
+  return new Promise((resolve, reject) => {
+    return api.getThreadList(limit, timestamp, tags, (err: FacebookError, data: any) => {
+      if (err) return reject(Error(err.error));
+      return resolve(data);
+    });
+  });
+}
+
+function logout(
+  api: facebook.API
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    return api.logout((err: FacebookError) => {
+      if (err) return reject(Error(err.error));
+
+      return resolve();
+    });
+  })
 }
 
 function getApi(
@@ -70,7 +130,11 @@ function getApi(
 }
 
 export default {
-  fetchApiUserFriends,
   getApi,
+  fetchApiUserFriends,
   fetchUserInfo,
+  fetchUserInfoBatch,
+  fetchThreadInfo,
+  fetchThreads,
+  logout
 };

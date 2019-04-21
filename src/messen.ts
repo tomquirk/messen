@@ -1,19 +1,22 @@
 import facebook from 'facebook-chat-api';
-import messen from 'messen';
-import fs from 'fs';
 
 import * as settings from './settings';
 
+import { ThreadStore } from './store/threads'
+import { UserStore } from './store/users';
+
 import * as helpers from './util/helpers';
+import { facebookFriendToUser } from './util/transformers';
 import getLogger from './util/logger';
 import api from './api';
+
 
 const logger = getLogger('messen');
 if (settings.ENVIRONMENT !== 'production') {
   logger.info('Logging initialized at debug level');
 }
 
-const getAuth = (
+const getAuth = async (
   promptCredentialsFn: () => Promise<facebook.Credentials>,
   credentials?: facebook.Credentials,
   useCache?: boolean,
@@ -29,31 +32,37 @@ const getAuth = (
     return useCredentials();
   }
 
-  return helpers
-    .loadAppState(settings.APPSTATE_FILE_PATH)
-    .then(appState => {
-      logger.debug('Appstate loaded successfully');
-      return { appState };
-    })
-    .catch(() => {
-      logger.debug('Appstate not found. Falling back to provided credentials');
-
-      return useCredentials();
-    });
+  try {
+    const appState = await helpers
+      .loadAppState(settings.APPSTATE_FILE_PATH);
+    logger.debug('Appstate loaded successfully');
+    return { appState };
+  }
+  catch (e) {
+    logger.debug('Appstate not found. Falling back to provided credentials');
+    return useCredentials();
+  }
 };
 
-class Messen {
+export class Messen {
   api: facebook.API;
-  user: messen.MessenMeUser;
   state: {
     authenticated: boolean;
   };
+  store: {
+    threads: ThreadStore,
+    users: UserStore
+  }
   options: any;
   constructor(options: any = {}) {
     this.options = options;
     this.state = {
       authenticated: false,
     };
+    this.store = {
+      threads: undefined,
+      users: undefined
+    }
   }
 
   getMfaCode(): Promise<string> {
@@ -64,10 +73,10 @@ class Messen {
     return Promise.reject(Error('promptCredentials not implemented'));
   }
 
-  login(
+  async login(
     credentials?: facebook.Credentials,
     useCache: boolean = true,
-  ): Promise<messen.MessenMeUser> {
+  ): Promise<void> {
     const apiConfig = {
       forceLogin: true,
       logLevel: this.options.debug ? 'info' : 'silent',
@@ -75,40 +84,28 @@ class Messen {
       listenEvents: true,
     };
 
-    return getAuth(this.promptCredentials, credentials, useCache)
-      .then(authPayload => {
-        return api.getApi(authPayload, apiConfig, this.getMfaCode);
-      })
-      .then(api => {
-        this.api = api;
+    const authPayload = await getAuth(this.promptCredentials, credentials, useCache);
+    this.api = await api.getApi(authPayload, apiConfig, this.getMfaCode);
+    await helpers.saveAppState(this.api.getAppState(), settings.APPSTATE_FILE_PATH);
+    logger.debug('App state saved');
+    this.state.authenticated = true;
 
-        return helpers.saveAppState(
-          api.getAppState(),
-          settings.APPSTATE_FILE_PATH,
-        );
-      })
-      .then(() => {
-        logger.debug('App state saved');
+    this.store = {
+      threads: new ThreadStore(this.api),
+      users: new UserStore(this.api)
+    }
 
-        this.state.authenticated = true;
-
-        return Promise.all([
-          api.fetchUserInfo(this.api, this.api.getCurrentUserID()),
-          api.fetchApiUserFriends(this.api),
-        ]);
-      })
-      .then(([user, friends]) => {
-        this.user = Object.assign(user, { friends });
-
-        return this.user;
-      });
+    await Promise.all([
+      this.store.threads.refresh(),
+      this.store.users.refresh()
+    ]);
   }
 
-  onMessage(ev: facebook.APIEvent): void | Error {
+  onMessage(ev: facebook.MessageEvent): void | Error {
     return Error('onMessage not implemented');
   }
 
-  onThreadEvent(ev: facebook.APIEvent): void | Error {
+  onThreadEvent(ev: facebook.EventEvent): void | Error {
     return Error('onThreadEvent not implemented');
   }
 
@@ -118,22 +115,28 @@ class Messen {
         return logger.error(err);
       }
 
-      switch (ev.type) {
-        case 'message':
-          return this.onMessage(ev);
-        case 'event':
-          return this.onThreadEvent(ev);
-      }
+      // inject thread data in to event
+      return this.store.threads.getThread({ id: ev.threadID }).then(thread => {
+        const messenEvent = Object.assign(ev, {
+          thread
+        })
+
+        switch (messenEvent.type) {
+          case 'message':
+            return this.onMessage(messenEvent);
+          case 'event':
+            return this.onThreadEvent(messenEvent);
+        }
+      })
     });
   }
 
-  logout(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      fs.unlink(settings.APPSTATE_FILE_PATH, () => {
-        return resolve();
-      });
-    });
+  async logout(): Promise<void> {
+    await Promise.all([
+      api.logout(this.api),
+      helpers.clearAppState(settings.APPSTATE_FILE_PATH)
+    ]);
+
+    this.state.authenticated = false;
   }
 }
-
-export = Messen;

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import readline from 'readline';
 
-import Messen from '../../src/messen';
+import { Messen } from '../../src/messen';
 
 function promptCode(): Promise<string> {
   const rl = readline.createInterface({
@@ -18,27 +18,27 @@ function promptCode(): Promise<string> {
   });
 }
 
-describe('Messen', function() {
+describe('Messen', function () {
   let messen: Messen;
-  beforeEach(() => {
+  before(() => {
     messen = new Messen();
     messen.getMfaCode = () => {
       return promptCode();
     };
   });
 
-  it('should be able to log in to a real Facebook account', function() {
+  it('should be able to log in to a real Facebook account', async function () {
     this.timeout(60 * 1000); // 60s timeout
-    return messen
-      .login(
-        {
-          email: process.env.FACEBOOK_EMAIL,
-          password: process.env.FACEBOOK_PASSWORD,
-        },
-        false,
-      )
-      .then(() => {
-        expect(messen.state.authenticated).to.be.true;
-      });
+    await messen
+      .login({
+        email: process.env.FACEBOOK_EMAIL,
+        password: process.env.FACEBOOK_PASSWORD,
+      }, false);
+    expect(messen.state.authenticated).to.be.true;
+  });
+
+  it('should be able to log out', async function () {
+    await messen.logout();
+    expect(messen.state.authenticated).to.be.false;
   });
 });
