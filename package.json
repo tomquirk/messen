@@ -1,6 +1,6 @@
 {
   "name": "messen",
-  "version": "0.0.5",
+  "version": "1.0.0-beta.0",
   "description": "A lightweight framework for building Facebook Messenger apps",
   "main": "dist/messen.js",
   "types": "dist/messen.d.ts",
