@@ -15,7 +15,7 @@ const getlogger = (name: string) =>
           ),
         ),
       }),
-      new transports.File({ filename: `${name}.debug.log`, level: 'debug' }),
+      // new transports.File({ filename: `${name}.debug.log`, level: 'debug' }),
     ],
   });
 
