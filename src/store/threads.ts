@@ -42,12 +42,14 @@ export class ThreadStore {
     return this._threads[id]
   }
 
-  _getThreadByName(nameQuery: string): facebook.FacebookThread | undefined {
+  _getThreadByName(nameQuery: string): facebook.FacebookThread | null {
     let threadId = this._threadNameToId[nameQuery]
     if (!threadId) {
       const threadName = Object.keys(this._threadNameToId).find(name =>
         name.toLowerCase().startsWith(nameQuery.toLowerCase()),
       );
+      if (!threadName) return null
+
       threadId = this._threadNameToId[threadName]
     }
 
@@ -70,7 +72,7 @@ export class ThreadStore {
     });
   }
 
-  async getThread(query: ThreadQuery): Promise<facebook.BaseFacebookThread> {
+  async getThread(query: ThreadQuery): Promise<facebook.BaseFacebookThread | null> {
     let thread = undefined;
     const { name, id } = query
     // look for ID, then for name

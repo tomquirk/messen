@@ -16,7 +16,7 @@ function fetchUserInfo(
   return new Promise((resolve, reject) => {
     return api.getUserInfo(
       userId,
-      (err: FacebookError, data: { [key: string]: facebook.FacebookUser }) => {
+      (err, data: { [key: string]: facebook.FacebookUser }) => {
         if (err) return reject(Error(err.error));
 
         const user = data[userId];
@@ -35,7 +35,7 @@ function fetchUserInfoBatch(
   return new Promise((resolve, reject) => {
     return api.getUserInfo(
       userIds,
-      (err: FacebookError, data: { [key: string]: facebook.FacebookUser }) => {
+      (err, data: { [key: string]: facebook.FacebookUser }) => {
         if (err) return reject(Error(err.error));
 
         const users = Object.keys(data).map(k => {
@@ -52,7 +52,7 @@ function fetchApiUserFriends(
   api: facebook.API,
 ): Promise<Array<facebook.FacebookFriend>> {
   return new Promise((resolve, reject) => {
-    return api.getFriendsList((err: FacebookError, data: any) => {
+    return api.getFriendsList((err, data: any) => {
       if (err) return reject(Error(err.error));
 
       return resolve(data);
@@ -65,7 +65,7 @@ function fetchThreadInfo(
   threadId: string
 ): Promise<facebook.FacebookThread> {
   return new Promise((resolve, reject) => {
-    return api.getThreadInfo(threadId, (err: FacebookError, data: any) => {
+    return api.getThreadInfo(threadId, (err, data: any) => {
       if (err) return reject(Error(err.error));
 
       return resolve(data);
@@ -76,11 +76,11 @@ function fetchThreadInfo(
 function fetchThreads(
   api: facebook.API,
   limit: number,
-  timestamp: string = null,
-  tags: facebook.ThreadListTagQuery = []
+  timestamp?: string,
+  tags?: facebook.ThreadListTagQuery
 ): Promise<Array<facebook.FacebookThread>> {
   return new Promise((resolve, reject) => {
-    return api.getThreadList(limit, timestamp, tags, (err: FacebookError, data: any) => {
+    return api.getThreadList(limit, timestamp, tags || [], (err: FacebookError | undefined, data: any) => {
       if (err) return reject(Error(err.error));
       return resolve(data);
     });
@@ -91,7 +91,7 @@ function logout(
   api: facebook.API
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    return api.logout((err: FacebookError) => {
+    return api.logout((err) => {
       if (err) return reject(Error(err.error));
 
       return resolve();
@@ -111,7 +111,11 @@ function getApi(
           case 'login-approval':
             return getMfaCode().then((code: string) => {
               logger.debug('MFA code: ' + code);
-              return err.continue(code);
+              if (err.continue) {
+                return err.continue(code);
+              }
+
+              return reject(Error(`Failed to login: we couldnt send your MFA code`))
             });
           default:
             return reject(Error(`Failed to login: ${err.error}`));

@@ -9,9 +9,16 @@ import * as helpers from './util/helpers';
 import getLogger from './util/logger';
 import api from './api';
 
-type MessenOptions = {
+type MessenOptionsRequest = {
   dir?: string;
   appstateFilePath?: string
+  debug?: boolean
+}
+
+type MessenOptions = {
+  dir: string;
+  appstateFilePath: string
+  debug?: boolean
 }
 
 
@@ -50,36 +57,39 @@ const getAuth = async (
 };
 
 const DEFAULT_OPTIONS = {
-  dir: settings.MESSEN_PATH
+  dir: settings.MESSEN_PATH,
+  debug: false
 }
 
 export class Messen {
-  api: facebook.API;
+  api!: facebook.API;
   state: {
     authenticated: boolean;
   };
-  store: {
+  store!: {
     threads: ThreadStore,
-    users: UserStore
+    users: UserStore,
   }
-  options: any;
-  constructor(options: MessenOptions = {}) {
-    this.options = Object.assign(DEFAULT_OPTIONS, options);
+  options: MessenOptions
 
+  constructor(optionsRequest: MessenOptionsRequest = {}) {
     // correct any user-defined backslash
-    if (this.options.dir[this.options.dir.length - 1] === '/') {
-      this.options.dir = this.options.dir.slice(0, this.options.dir.length - 1)
+    if (optionsRequest.dir && optionsRequest.dir[optionsRequest.dir.length - 1] === '/') {
+      optionsRequest.dir = optionsRequest.dir.slice(0, optionsRequest.dir.length - 1)
     }
 
-    this.options.appstateFilePath = `${this.options.dir}/tmp/appstate.json`
+    if (!optionsRequest.dir) {
+      optionsRequest.dir = DEFAULT_OPTIONS.dir
+    }
+
+    this.options = {
+      dir: optionsRequest.dir || DEFAULT_OPTIONS.dir,
+      appstateFilePath: `${optionsRequest.dir}/tmp/appstate.json`
+    }
 
     this.state = {
       authenticated: false,
     };
-    this.store = {
-      threads: undefined,
-      users: undefined
-    }
   }
 
   getMfaCode(): Promise<string> {

@@ -8,7 +8,7 @@ declare function Facebook(
     selfListen: boolean;
     listenEvents: boolean;
   },
-  callback: (err: Facebook.FacebookError, api: any) => any,
+  callback: (err: Facebook.FacebookError | undefined, api: any) => any,
 ): string;
 
 declare namespace Facebook {
@@ -60,19 +60,19 @@ declare namespace Facebook {
     nicknames: Array<any>,
     unreadCount: number,
     messageCount: number,
-    imageSrc: string,
+    imageSrc: string | null,
     timestamp: string,
-    muteUntil: string,
+    muteUntil: string | null,
     isGroup: boolean,
     isSubscribed: boolean,
     folder: "INBOX" | "ARCHIVE",
     isArchived: boolean,
-    cannotReplyReason: string,
-    lastReadTimestamp: string,
+    cannotReplyReason: string | null,
+    lastReadTimestamp: string | null,
     emoji: {
       emoji: string
-    },
-    color: string,
+    } | null,
+    color: string | null,
     adminIDs: Array<string>,
     participants: Array<any>,
     customizationEnabled: boolean,
@@ -81,7 +81,7 @@ declare namespace Facebook {
     reactionsMuteMode: 'REACTIONS_NOT_MUTED',
     mentionsMuteMode: 'MENTIONS_NOT_MUTED',
     snippet: string,
-    snippetAttachments: Array<any>,
+    snippetAttachments: Array<any> | null,
     snippetSender: string,
     lastMessageTimestamp: string,
     threadType: number
@@ -99,29 +99,29 @@ declare namespace Facebook {
 
   export class API {
     listen(
-      callback: (err: Facebook.FacebookError, event: Facebook.APIEvent) => void,
+      callback: (err: Facebook.FacebookError | undefined, event: Facebook.APIEvent) => void,
     ): void;
     getCurrentUserID(): string;
     getAppState(): AppState;
     getUserInfo(
       userId: string | Array<string>,
-      callback: (err: Facebook.FacebookError, data: any) => void,
+      callback: (err: Facebook.FacebookError | undefined, data: any) => void,
     ): void;
     getFriendsList(
-      callback: (err: Facebook.FacebookError, data: any) => void,
+      callback: (err: Facebook.FacebookError | undefined, data: any) => void,
     ): void;
     getThreadInfo(
       threadId: string,
-      callback: (err: Facebook.FacebookError, data: any) => void,
+      callback: (err: Facebook.FacebookError | undefined, data: any) => void,
     ): void;
     getThreadList(
       limit: number,
-      timestamp: string,
+      timestamp: string | undefined,
       tags: ThreadListTagQuery,
-      callback: (err: Facebook.FacebookError, data: any) => void
+      callback: (err: Facebook.FacebookError | undefined, data: any) => void
     ): void;
     logout(
-      callback: (err: Facebook.FacebookError) => void
+      callback: (err: Facebook.FacebookError | undefined) => void
     ): void
   }
 

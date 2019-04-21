@@ -6,13 +6,20 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "declaration": true,
-    "sourceMap": true,
+    "removeComments": true,
+    "sourceMap": false,
     "outDir": "dist",
     "baseUrl": ".",
     "resolveJsonModule": true,
     "paths": {
       "*": ["node_modules/*", "src/types/*"]
-    }
+    },
+    "alwaysStrict": true,
+    "strict": true,
+    "noUnusedLocals": true
   },
-  "include": ["src/**/*", "test/mock.ts"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules"
+  ]
 }

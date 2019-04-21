@@ -7,6 +7,10 @@ type UserQuery = {
   name?: string
 }
 
+function notUndefined<T>(x: T | undefined): x is T {
+  return x !== undefined;
+}
+
 export class UserStore {
   _users: {
     [id: string]: facebook.FacebookUser
@@ -15,7 +19,7 @@ export class UserStore {
     [name: string]: string
   }
   _api: facebook.API
-  me: {
+  me!: {
     user: facebook.FacebookUser,
     friends: Array<facebook.FacebookUser>
   }
@@ -25,10 +29,6 @@ export class UserStore {
     this._api = api;
     this._users = {}
     this._userNameToId = {}
-    this.me = {
-      user: undefined,
-      friends: undefined
-    }
   }
 
   _upsertUser(user: facebook.FacebookUser): void {
@@ -40,12 +40,14 @@ export class UserStore {
     return this._users[id]
   }
 
-  _getUserByName(nameQuery: string): facebook.FacebookUser | undefined {
+  _getUserByName(nameQuery: string): facebook.FacebookUser | null {
     let userId = this._userNameToId[nameQuery]
     if (!userId) {
       const userName = Object.keys(this._userNameToId).find(name =>
         name.toLowerCase().startsWith(nameQuery.toLowerCase()),
       );
+      if (!userName) return null
+
       userId = this._userNameToId[userName]
     }
 
@@ -88,7 +90,7 @@ export class UserStore {
     ])
   }
 
-  async getUser(query: UserQuery): Promise<facebook.FacebookUser> {
+  async getUser(query: UserQuery): Promise<facebook.FacebookUser | null> {
     let user = undefined;
     const { name, id } = query
     // look for ID, then for name 
@@ -107,20 +109,20 @@ export class UserStore {
     return Promise.resolve(null)
   }
 
-  async getUsers(userIds: Array<string>): Promise<Array<facebook.FacebookUser>> {
-    const cachedUsers = userIds.map((id) => this._getUserById(id))
+  async getUsers(userIds: Array<string>): Promise<Array<facebook.FacebookUser | undefined>> {
+    const cachedUsers = userIds.map((id) => this._getUserById(id)).filter(x => notUndefined(x)) as facebook.FacebookUser[]
     const missingUserIds = cachedUsers.map((val, i) => {
-      if (val) return
+      if (val) return undefined
 
       return userIds[i]
-    }).filter(Boolean)
+    }).filter(x => notUndefined(x)) as string[]
 
     let fetchedUsers: Array<facebook.FacebookUser> = []
 
     if (missingUserIds.length > 0) {
       // fetch any users we dont have cached
       const fetchedUsers = await api.fetchUserInfoBatch(this._api, missingUserIds)
-      fetchedUsers.forEach(user => {
+      fetchedUsers.forEach((user: facebook.FacebookUser) => {
         this._upsertUser(user)
       })
     }

@@ -1,4 +1,4 @@
-import facebook, { FacebookUser } from 'facebook-chat-api';
+import facebook, { FacebookUser } from 'facebook-chat-api  
 import { ThreadStore } from '../src/store/threads'
 import { UserStore } from '../src/store/users'
 import { facebookFriendToUser } from '../src/util/transformers'
