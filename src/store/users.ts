@@ -1,6 +1,6 @@
 import facebook from 'facebook-chat-api';
 import api from '../api';
-import { facebookFriendToUser } from '../../src/util/transformers';
+import { facebookFriendToUser } from '../util/transformers';
 
 type UserQuery = {
   id?: string

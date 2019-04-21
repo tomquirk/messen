@@ -116,7 +116,7 @@ declare namespace Facebook {
     ): void;
     getThreadList(
       limit: number,
-      timestamp: string | undefined,
+      timestamp: string | null,
       tags: ThreadListTagQuery,
       callback: (err: Facebook.FacebookError | undefined, data: any) => void
     ): void;

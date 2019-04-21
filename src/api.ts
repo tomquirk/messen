@@ -80,7 +80,7 @@ function fetchThreads(
   tags?: facebook.ThreadListTagQuery
 ): Promise<Array<facebook.FacebookThread>> {
   return new Promise((resolve, reject) => {
-    return api.getThreadList(limit, timestamp, tags || [], (err: FacebookError | undefined, data: any) => {
+    return api.getThreadList(limit, timestamp || null, tags || [], (err: FacebookError | undefined, data: any) => {
       if (err) return reject(Error(err.error));
       return resolve(data);
     });
