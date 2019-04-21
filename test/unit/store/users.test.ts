@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { getUserStore } from '../../mock';
+import { getUserStore } from '../../messen.mock';
 import { UserStore } from '../../../src/store/users'
 
 describe('User Store', function () {
@@ -12,6 +12,7 @@ describe('User Store', function () {
   it('should be able to get a user by id', async function () {
     await userStore.getUser({ id: '100003961877411' }).then(user => {
       expect(user).to.exist;
+      if (!user) throw new Error()
       expect(user.id).to.equal('100003961877411')
     })
   });
@@ -19,6 +20,7 @@ describe('User Store', function () {
   it('should be able to get a user by name', async function () {
     await userStore.getUser({ name: 'tom quirk' }).then(user => {
       expect(user).to.exist;
+      if (!user) throw new Error()
       expect(user.id).to.equal('100003961877411')
     })
   });
@@ -26,6 +28,7 @@ describe('User Store', function () {
   it('should be able to get a user by fuzzy user name', async function () {
     await userStore.getUser({ name: 'to' }).then(user => {
       expect(user).to.exist;
+      if (!user) throw new Error()
       expect(user.id).to.equal('100003961877411')
     })
   });
@@ -33,6 +36,7 @@ describe('User Store', function () {
   it('should be able to get a user by id when query contains both name and id', async function () {
     await userStore.getUser({ id: '100003961877411', name: 'ahhaha' }).then(user => {
       expect(user).to.exist;
+      if (!user) throw new Error()
       expect(user.id).to.equal('100003961877411')
     })
   });
@@ -41,8 +45,11 @@ describe('User Store', function () {
     await userStore.getUsers(['100003961877411', '100035969370185']).then(users => {
       expect(users).to.exist;
       expect(users.length).to.equal(2);
-      expect(users[0].id).to.equal('100003961877411')
-      expect(users[1].id).to.equal('100035969370185')
+      const userA = users[0]
+      const userB = users[1]
+      if (!userA || !userB) throw new Error()
+      expect(userA.id).to.equal('100003961877411')
+      expect(userB.id).to.equal('100035969370185')
     })
   });
 
@@ -51,8 +58,11 @@ describe('User Store', function () {
       expect(users).to.exist;
       expect(users.length).to.equal(3);
       expect(users[0]).to.equal(undefined)
-      expect(users[1].id).to.equal('100003961877411')
-      expect(users[2].id).to.equal('100035969370185')
+      const userA = users[1]
+      const userB = users[2]
+      if (!userA || !userB) throw new Error()
+      expect(userA.id).to.equal('100003961877411')
+      expect(userB.id).to.equal('100035969370185')
     })
   });
 

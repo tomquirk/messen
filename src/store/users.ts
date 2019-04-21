@@ -63,7 +63,7 @@ export class UserStore {
     return user;
   }
 
-  async _refreshMeFriends(): Promise<void> {
+  async _refreshMeFriends(): Promise<Array<facebook.FacebookUser>> {
     return api.fetchApiUserFriends(this._api).then(friendsRaw => {
       const friends = friendsRaw.map(f => {
         const user = facebookFriendToUser(f)
@@ -71,14 +71,13 @@ export class UserStore {
         return user
       })
 
-      this.me.friends = friends
+      return friends
     })
   }
 
   async _refreshMeUser(): Promise<facebook.FacebookUser> {
     return api.fetchUserInfo(this._api, this._api.getCurrentUserID()).then(user => {
       this._upsertUser(user)
-      this.me.user = user
       return user
     })
   }
@@ -87,7 +86,12 @@ export class UserStore {
     return Promise.all([
       this._refreshMeFriends(),
       this._refreshMeUser()
-    ])
+    ]).then(([friends, user]) => {
+      this.me = {
+        user,
+        friends
+      }
+    })
   }
 
   async getUser(query: UserQuery): Promise<facebook.FacebookUser | null> {

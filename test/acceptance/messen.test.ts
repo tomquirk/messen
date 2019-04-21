@@ -29,6 +29,7 @@ describe('Messen', function () {
 
   it('should be able to log in to a real Facebook account', async function () {
     this.timeout(60 * 1000); // 60s timeout
+    if (!process.env.FACEBOOK_EMAIL || !process.env.FACEBOOK_PASSWORD) throw new Error()
     await messen
       .login({
         email: process.env.FACEBOOK_EMAIL,

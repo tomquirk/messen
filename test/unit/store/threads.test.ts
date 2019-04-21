@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { getThreadStore } from '../../mock';
+import { getThreadStore } from '../../messen.mock';
 import { ThreadStore } from '../../../src/store/threads'
 
 describe('Thread Store', function () {
@@ -12,6 +12,7 @@ describe('Thread Store', function () {
   it('should be able to get a thread by id', async function () {
     await threadStore.getThread({ id: '100003961877411' }).then(thread => {
       expect(thread).to.exist;
+      if (!thread) throw new Error()
       expect(thread.threadID).to.equal('100003961877411')
     })
   });
@@ -19,6 +20,7 @@ describe('Thread Store', function () {
   it('should be able to get a thread by name', async function () {
     await threadStore.getThread({ name: 'tom quirk' }).then(thread => {
       expect(thread).to.exist;
+      if (!thread) throw new Error()
       expect(thread.threadID).to.equal('100003961877411')
     })
   });
@@ -26,6 +28,7 @@ describe('Thread Store', function () {
   it('should be able to get a thread by fuzzy thread name', async function () {
     await threadStore.getThread({ name: 'to' }).then(thread => {
       expect(thread).to.exist;
+      if (!thread) throw new Error()
       expect(thread.threadID).to.equal('100003961877411')
     })
   });
@@ -33,6 +36,7 @@ describe('Thread Store', function () {
   it('should be able to get a thread by id when query contains both name and id', async function () {
     await threadStore.getThread({ id: '100003961877411', name: 'ahhaha' }).then(thread => {
       expect(thread).to.exist;
+      if (!thread) throw new Error()
       expect(thread.threadID).to.equal('100003961877411')
     })
   });
