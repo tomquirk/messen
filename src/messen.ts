@@ -6,9 +6,13 @@ import { ThreadStore } from './store/threads'
 import { UserStore } from './store/users';
 
 import * as helpers from './util/helpers';
-import { facebookFriendToUser } from './util/transformers';
 import getLogger from './util/logger';
 import api from './api';
+
+type MessenOptions = {
+  dir?: string;
+  appstateFilePath?: string
+}
 
 
 const logger = getLogger('messen');
@@ -17,6 +21,7 @@ if (settings.ENVIRONMENT !== 'production') {
 }
 
 const getAuth = async (
+  appstateFilePath: string,
   promptCredentialsFn: () => Promise<facebook.Credentials>,
   credentials?: facebook.Credentials,
   useCache?: boolean,
@@ -34,7 +39,7 @@ const getAuth = async (
 
   try {
     const appState = await helpers
-      .loadAppState(settings.APPSTATE_FILE_PATH);
+      .loadAppState(appstateFilePath);
     logger.debug('Appstate loaded successfully');
     return { appState };
   }
@@ -43,6 +48,10 @@ const getAuth = async (
     return useCredentials();
   }
 };
+
+const DEFAULT_OPTIONS = {
+  dir: settings.MESSEN_PATH
+}
 
 export class Messen {
   api: facebook.API;
@@ -54,8 +63,16 @@ export class Messen {
     users: UserStore
   }
   options: any;
-  constructor(options: any = {}) {
-    this.options = options;
+  constructor(options: MessenOptions = {}) {
+    this.options = Object.assign(DEFAULT_OPTIONS, options);
+
+    // correct any user-defined backslash
+    if (this.options.dir[this.options.dir.length - 1] === '/') {
+      this.options.dir = this.options.dir.slice(0, this.options.dir.length - 1)
+    }
+
+    this.options.appstateFilePath = `${this.options.dir}/tmp/appstate.json`
+
     this.state = {
       authenticated: false,
     };
@@ -83,10 +100,9 @@ export class Messen {
       selfListen: true,
       listenEvents: true,
     };
-
-    const authPayload = await getAuth(this.promptCredentials, credentials, useCache);
+    const authPayload = await getAuth(this.options.appstateFilePath, this.promptCredentials, credentials, useCache);
     this.api = await api.getApi(authPayload, apiConfig, this.getMfaCode);
-    await helpers.saveAppState(this.api.getAppState(), settings.APPSTATE_FILE_PATH);
+    await helpers.saveAppState(this.api.getAppState(), this.options.appstateFilePath);
     logger.debug('App state saved');
     this.state.authenticated = true;
 
@@ -134,7 +150,7 @@ export class Messen {
   async logout(): Promise<void> {
     await Promise.all([
       api.logout(this.api),
-      helpers.clearAppState(settings.APPSTATE_FILE_PATH)
+      helpers.clearAppState(this.options.appstateFilePath)
     ]);
 
     this.state.authenticated = false;

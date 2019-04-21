@@ -100,9 +100,11 @@ export class UserStore {
 
     if (user) return Promise.resolve(user)
 
-    if (!id) return Promise.reject('Invalid params')
+    if (id) {
+      return await this._refreshUser(id)
+    }
 
-    return await this._refreshUser(id)
+    return Promise.resolve(null)
   }
 
   async getUsers(userIds: Array<string>): Promise<Array<facebook.FacebookUser>> {

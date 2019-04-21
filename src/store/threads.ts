@@ -82,9 +82,11 @@ export class ThreadStore {
 
     if (thread) return Promise.resolve(thread)
 
-    if (!id) return Promise.reject('Invalid params')
+    if (id) {
+      return await this._refreshThread(id)
+    }
 
-    return await this._refreshThread(id)
+    return Promise.resolve(null)
   }
 
   getThreadList(limit?: number): Array<facebook.BaseFacebookThread> {

@@ -14,7 +14,7 @@ const threads: Array<facebook.FacebookThread> = [
     color: null,
     nicknames: [],
     muteUntil: null,
-    participants: [Array],
+    participants: [{ id: '100003961877411' }, { id: '100035969370185' }], // TODO(tom) there is actually full user objects here
     adminIDs: [],
     folder: 'INBOX',
     isGroup: false,
