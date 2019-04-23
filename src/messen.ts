@@ -138,7 +138,7 @@ export class Messen {
   listen(): void {
     this.api.listen((err, ev) => {
       if (err) {
-        return logger.error(err);
+        return logger.info(err.error);
       }
 
       // inject thread data in to event
