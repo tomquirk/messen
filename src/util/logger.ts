@@ -1,4 +1,4 @@
-const { createLogger, format, transports } = require('winston');
+import { createLogger, format, transports } from 'winston';
 import { ENVIRONMENT } from '../settings';
 
 const getlogger = (name: string) =>
