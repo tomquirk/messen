@@ -1,6 +1,6 @@
 {
   "name": "messen",
-  "version": "1.0.0-beta.6",
+  "version": "1.0.0-beta.7",
   "description": "A lightweight framework for building Facebook Messenger apps",
   "main": "dist/messen.js",
   "types": "dist/messen.d.ts",
@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node index.js",
     "build-ts": "tsc",
+    "publish-ts": "npm run build-ts && npm publish",
     "dev": "npm run build-ts && npm start",
     "test": "npm run build-ts && mocha -r ts-node/register test/**/*.test.ts",
     "test-unit": "npm run build-ts && mocha -r ts-node/register test/unit/**/*.test.ts"
