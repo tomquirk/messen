@@ -159,9 +159,9 @@ export class Messen {
 
   async logout(): Promise<void> {
     await Promise.all([
-      api.logout(this.api),
+      this.api ? api.logout(this.api) : Promise.resolve(),
       helpers.clearAppState(this.options.appstateFilePath)
-    ]);
+    ])
 
     this.state.authenticated = false;
   }

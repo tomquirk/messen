@@ -49,7 +49,7 @@ export function clearAppState(filepath: string,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     fs.unlink(filepath, (err) => {
-      if (err) return reject(err)
+      // if (err) return reject(err)
       return resolve();
     });
   });
