@@ -1,5 +1,6 @@
 import facebook from 'facebook-chat-api';
 import api from '../api';
+import { sortObjects } from '../util/helpers'
 
 type ThreadQuery = {
   id?: string
@@ -26,8 +27,8 @@ export class ThreadStore {
 
   _cleanThread(thread: facebook.FacebookThread): facebook.FacebookThread {
     if (thread.isGroup && thread.name === null) {
-      const participantNames = thread.participants.filter(user => user.id !== this._api.getCurrentUserID()).map(user => user.name).join(', ')
-      thread.name = `(group) ${participantNames}`
+      const participantNames = (thread.participants || []).filter(user => user.id !== this._api.getCurrentUserID()).map(user => user.name).join(', ')
+      thread.name = `(group) ${participantNames || thread.threadID}`
     }
     return thread
   }
@@ -91,7 +92,7 @@ export class ThreadStore {
     return Promise.resolve(null)
   }
 
-  getThreadList(limit?: number): Array<facebook.BaseFacebookThread> {
-    return Object.values(this._threads).slice(0, limit)
+  getThreadList(limit?: number, order: 'asc' | 'desc' = 'desc'): Array<facebook.BaseFacebookThread> {
+    return sortObjects(Object.values(this._threads), "lastMessageTimestamp", order).slice(0, limit)
   }
 }

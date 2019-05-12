@@ -74,7 +74,7 @@ declare namespace Facebook {
     } | null,
     color: string | null,
     adminIDs: Array<string>,
-    participants: Array<any>,
+    participants: Array<FacebookUser> | undefined,
     customizationEnabled: boolean,
     participantAddMode: string | null,
     montageThread: any,

@@ -54,3 +54,11 @@ export function clearAppState(filepath: string,
     });
   });
 }
+
+export function sortObjects(arr: Array<any>, key: string, order: 'asc' | 'desc'): Array<any> {
+  return arr.sort((a, b) => {
+    if (a[key] < b[key]) return order === 'asc' ? -1 : 1;
+    if (a[key] > b[key]) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
+};
