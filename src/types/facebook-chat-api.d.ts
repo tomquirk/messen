@@ -98,7 +98,7 @@ declare namespace Facebook {
     ["INBOX", "unread"] | ["ARCHIVED", "unread"] | ["PENDING", "unread"] | ["OTHER", "unread"]
 
   export class API {
-    listen(
+    listenMqtt(
       callback: (err: Facebook.FacebookError | undefined, event: Facebook.APIEvent) => void,
     ): void;
     getCurrentUserID(): string;

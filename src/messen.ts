@@ -136,7 +136,7 @@ export class Messen {
   }
 
   listen(): void {
-    this.api.listen((err, ev) => {
+    this.api.listenMqtt((err, ev) => {
       if (err) {
         return logger.info(err.error);
       }
